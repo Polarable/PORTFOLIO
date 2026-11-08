@@ -36,8 +36,8 @@
   .b3 { --a: 87%; --b: 98%; filter: blur(calc(var(--w) * .0036)); }
   .b4 { filter: blur(calc(var(--w) * .0054)); }
   .card:not(.b4) {
-    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 var(--a), transparent var(--b));
-            mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 var(--a), transparent var(--b));
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at var(--x) var(--y), #000 calc(var(--a) + var(--s)), transparent calc(var(--b) + var(--s)));
+            mask-image: radial-gradient(ellipse 50% 50% at var(--x) var(--y), #000 calc(var(--a) + var(--s)), transparent calc(var(--b) + var(--s)));
   }
   .b4, .b3, .b2, .b1 { pointer-events: none; user-select: none; }
 
@@ -53,29 +53,16 @@
   .stack:has(.sharp .links a:first-child:hover) .links a:first-child,
   .stack:has(.sharp .links a:last-child:hover) .links a:last-child { color: var(--red); }
 
-  /* Intro, a camera "focus pull": the piece arrives out of focus, the lens racks in,
-     overshoots a hair and settles, while the crisp zone opens out from the center.
-     Then the signature is written across the frame and the contact line racks in. */
-  @property --a { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
-  @property --b { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
-  .stack { animation: pull 1.9s cubic-bezier(.22, .61, .36, 1) .15s both; }
-  .sharp { animation: open 1.6s cubic-bezier(.65, 0, .35, 1) .35s both; }
-  .sig { animation: sign .95s cubic-bezier(.7, 0, .3, 1) 1.45s both; }
-  .links { animation: rack 1s cubic-bezier(.22, .61, .36, 1) 1.95s both; }
-  @keyframes pull {
-    0%   { opacity: 0; filter: blur(calc(var(--w) * .06)); scale: 1.045; }
-    25%  { opacity: 1; }
-    62%  { filter: blur(0); scale: 1; }
-    78%  { filter: blur(calc(var(--w) * .006)); }
-    100% { opacity: 1; filter: blur(0); scale: 1; }
-  }
-  @keyframes open { from { --a: 0%; --b: 6%; } to { --a: 48%; --b: 64%; } }
-  @keyframes sign { from { clip-path: inset(-20% 100% -20% 0); } to { clip-path: inset(-20% -20% -20% 0); } }
-  @keyframes rack {
-    from { opacity: 0; filter: blur(calc(var(--w) * .012)); letter-spacing: .12em; }
-    to   { opacity: 1; filter: blur(0); letter-spacing: 0; }
-  }
-  @media (prefers-reduced-motion: reduce) { .stack, .sharp, .sig, .links { animation: none; } }
+  /* Idle: the lens slowly "breathes". The crisp zone drifts a few percent off center and
+     grows and shrinks a little, on cycles of different lengths so it never visibly repeats. */
+  @property --x { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+  @property --y { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+  @property --s { syntax: '<percentage>'; inherits: true; initial-value: 0%; }
+  .stack { animation: drift-x 23s ease-in-out infinite alternate, drift-y 17s ease-in-out infinite alternate, breathe 11s ease-in-out infinite alternate; }
+  @keyframes drift-x { from { --x: 45%; } to { --x: 55%; } }
+  @keyframes drift-y { from { --y: 44%; } to { --y: 56%; } }
+  @keyframes breathe { from { --s: -4%; } to { --s: 4%; } }
+  @media (prefers-reduced-motion: reduce) { .stack { animation: none; } }
 
   /* Phones: the whole piece turns sideways and runs down the screen. */
   @media (orientation: portrait) and (max-width: 760px) {
