@@ -49,14 +49,33 @@
   a:focus-visible { outline: 1px solid var(--red); outline-offset: 2px; }
   b { font-weight: 700; }
 
-  /* Intro: the frame wipes in, the signature writes across it, then the contact line settles in. */
-  .frame { animation: wipe 1.1s cubic-bezier(.77, 0, .18, 1) .25s both; }
-  .sig { animation: wipe-sig 1s cubic-bezier(.65, 0, .35, 1) 1.05s both; }
-  .links { animation: rise .8s cubic-bezier(.16, 1, .3, 1) 1.7s both; }
-  @keyframes wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-  @keyframes wipe-sig { from { clip-path: inset(-20% 100% -20% 0); } to { clip-path: inset(-20% -20% -20% 0); } }
-  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .frame, .sig, .links { animation: none; } }
+  /* Hover: every copy in the stack changes color together, so the blurred rim follows. */
+  .stack:has(.sharp .links a:first-child:hover) .links a:first-child,
+  .stack:has(.sharp .links a:last-child:hover) .links a:last-child { color: var(--red); }
+
+  /* Intro, a camera "focus pull": the piece arrives out of focus, the lens racks in,
+     overshoots a hair and settles, while the crisp zone opens out from the center.
+     Then the signature is written across the frame and the contact line racks in. */
+  @property --a { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+  @property --b { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+  .stack { animation: pull 1.9s cubic-bezier(.22, .61, .36, 1) .15s both; }
+  .sharp { animation: open 1.6s cubic-bezier(.65, 0, .35, 1) .35s both; }
+  .sig { animation: sign .95s cubic-bezier(.7, 0, .3, 1) 1.45s both; }
+  .links { animation: rack 1s cubic-bezier(.22, .61, .36, 1) 1.95s both; }
+  @keyframes pull {
+    0%   { opacity: 0; filter: blur(calc(var(--w) * .06)); scale: 1.045; }
+    25%  { opacity: 1; }
+    62%  { filter: blur(0); scale: 1; }
+    78%  { filter: blur(calc(var(--w) * .006)); }
+    100% { opacity: 1; filter: blur(0); scale: 1; }
+  }
+  @keyframes open { from { --a: 0%; --b: 6%; } to { --a: 48%; --b: 64%; } }
+  @keyframes sign { from { clip-path: inset(-20% 100% -20% 0); } to { clip-path: inset(-20% -20% -20% 0); } }
+  @keyframes rack {
+    from { opacity: 0; filter: blur(calc(var(--w) * .012)); letter-spacing: .12em; }
+    to   { opacity: 1; filter: blur(0); letter-spacing: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .stack, .sharp, .sig, .links { animation: none; } }
 
   /* Phones: the whole piece turns sideways and runs down the screen. */
   @media (orientation: portrait) and (max-width: 760px) {
