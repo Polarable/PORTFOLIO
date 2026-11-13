@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<script>if (!/^#r\d/.test(location.hash) && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('intro');</script>
 <style>
 /* Layout (round 3, camera B): the page is the floor. No rules; every robot is rendered by one shared camera
    (85 mm, 4.5 m, eye 45 cm) with its real shadow, so they share a scale and a horizon. The robots are ONE compact tile
@@ -128,6 +129,19 @@ img { display: block; max-width: 100%; }
 .world a:hover .ext { stroke: var(--red); }
 .ptext { transition: opacity .35s ease; }
 .ptext.off { opacity: 0; transition: none; }
+/* ---------- opening the site: things settle in, staggered, instead of just being there ---------- */
+html.intro .bar, html.intro .wip, html.intro #car, html.intro #tstage, html.intro .t-cap, html.intro .more, html.intro .t-robots::before { opacity: 0; }
+html.play .bar { animation: in-fade .6s ease both; }
+html.play .wip { animation: in-rise 1s cubic-bezier(.2,.7,.2,1) .1s both; }
+html.play #car { animation: in-drive 1.3s cubic-bezier(.16,.8,.2,1) .3s both; }
+html.play .t-robots::before { transform-origin: 50% 0; animation: in-line .9s cubic-bezier(.6,0,.2,1) .35s both; }
+html.play #tstage { animation: in-rise 1s cubic-bezier(.2,.7,.2,1) .5s both; }
+html.play .t-cap { animation: in-fade .6s ease 1s both; }
+html.play .more { animation: in-fade .8s ease 1.25s both; }
+@keyframes in-fade { from { opacity: 0; } }
+@keyframes in-rise { from { opacity: 0; translate: 0 28px; } }
+@keyframes in-drive { from { opacity: 0; translate: -9% 0; } 30% { opacity: 1; } }
+@keyframes in-line { from { opacity: 1; scale: 1 0; } }
 .soon { padding-top: 56px; padding-bottom: 120px; }
 .soon p { grid-column: 1 / -1; margin: 0; text-align: center; font-size: 15px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; color: #7a7b76; }
 
@@ -166,10 +180,10 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   .row { overflow-x: auto; overflow-y: hidden; justify-content: flex-start; gap: 0; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
     margin: 0 calc(-1 * var(--m)); }
   .row::-webkit-scrollbar { display: none; }
-  .row .slide { scroll-snap-stop: always; flex: 0 0 74vw; display: flex; justify-content: center; align-items: flex-end; scroll-snap-align: center; }
+  .row .slide { scroll-snap-stop: always; flex: 0 0 54vw; display: flex; justify-content: center; align-items: flex-end; scroll-snap-align: center; }
   .row { transition: height .3s ease; }
-  .row .slide:first-child { margin-left: 13vw; } .row .slide:last-child { margin-right: 13vw; }
-  .row .slide:not(.on) .bot { opacity: .4; }
+  .row .slide:first-child { margin-left: 23vw; } .row .slide:last-child { margin-right: 23vw; }
+  .row .slide:not(.on) .bot { opacity: .5; }
   .row.hovering .bot:not(:hover) { opacity: 1; }
   .row .cap { display: none; }
   .mcap { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
@@ -192,16 +206,16 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
 <header class="bar">
   <a class="logo" href="#home" data-go="home" aria-label="Home"><img src="img/logo-ink.svg" alt="JT"></a>
   <div class="name"><b>Jarrett</b> Hutto</div>
-  <nav class="links" aria-label="Links"><a href="#home" data-go="home">Resume</a><a href="mailto:jarrett@jthutto.com">Contact</a><a href="#home" data-go="home">LinkedIn</a></nav>
+  <nav class="links" aria-label="Links"><a href="#home" data-go="home">Resume</a><a href="mailto:jarrett@jthutto.com">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener">LinkedIn</a></nav>
 </header>
 
 <main id="home">
   <div class="sp sp-top"></div>
   <div class="herowrap" id="herowrap">
   <div class="hero grid">
-    <div class="tile t-miata" aria-label="Miata, project coming soon">
+    <div class="tile t-miata" aria-label="Miata, coming soon">
       <div class="m-stage" id="mstage"><span class="wip" aria-hidden="true">WIP</span><img class="car" id="car" src="img/miata-side.webp" alt="Mazda Miata NA, grey clay model"></div>
-      <span class="t-cap"><span class="nm"><img class="lg lg-miata" src="brand/miata.svg" alt="Miata"><span>Project</span><span class="sub">Coming soon</span></span></span>
+      <span class="t-cap"><span class="nm"><img class="lg lg-miata" src="brand/miata.svg" alt="Miata"><span class="sub">Coming soon</span></span></span>
     </div>
     <button type="button" class="tile t-robots" id="robotsTile" aria-expanded="false" aria-controls="band" aria-label="FIRST Robotics, FRC 4639 robots">
       <span class="t-stage" id="tstage"></span>
@@ -220,7 +234,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
 </main>
 
 <main id="case" class="case" hidden></main>
-<nav class="tabbar" aria-label="Links"><a href="#home" data-go="home">Resume</a><a href="mailto:jarrett@jthutto.com">Contact</a><a href="#home" data-go="home">LinkedIn</a></nav>
+<nav class="tabbar" aria-label="Links"><a href="#home" data-go="home">Resume</a><a href="mailto:jarrett@jthutto.com">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener">LinkedIn</a></nav>
 
 <script src="turn/meta-v13.js"></script>
 <script>
@@ -291,7 +305,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
     }
     const W = band.clientWidth || (innerWidth - 2 * (phone() ? 16 : 40));
     let k;
-    if (phone()) { const tq = Math.min(...ORDER.map(y => M.r[y].topQ)); k = Math.min((innerHeight * 0.34) / (BH * (1 - tq + 0.04)), (innerWidth * 0.74) / Math.max(...ORDER.map(tightW))); }
+    if (phone()) { const tq = Math.min(...ORDER.map(y => M.r[y].topQ)); k = Math.min((innerHeight * 0.34) / (BH * (1 - tq + 0.04)), (innerWidth * 0.54) / Math.max(...ORDER.map(tightW))); }
     else {
       /* open, the row sits at the top and the robots take the rest of the screen */
       /* the robots get at least ~45% of the screen; if the projects above leave less, they shrink to make room */
@@ -387,6 +401,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   /* phone: the robot barely moves between the tile and the swipe row, so nothing flies or gets clipped. The robot
      settles in place, its neighbours slide in from behind it, + turns to x, and the caption stays under the robots. */
   function snap(on) { if (on) home.classList.add('snap'); else { home.offsetHeight; requestAnimationFrame(() => requestAnimationFrame(() => home.classList.remove('snap'))); } }
+  let nudged = false;
   async function phoneBand(want, D, tImgs, bImgs) {
     const others = (i) => bImgs.filter((_, j) => j !== i), sideX = (im) => { const r = im.getBoundingClientRect(); return r.left + r.width / 2 < innerWidth / 2 ? 40 : -40; };
     if (want) {
@@ -403,6 +418,8 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
       const bc = $('#bcap'), capTo = bc.getBoundingClientRect();   /* the caption glides down to its new spot, no fade */
       bc.animate([{ transform: `translateY(${capFrom.top - capTo.top}px)` }, { transform: 'none' }], { duration: D * .7, easing: EASE });
       $('#mcap').animate([{ opacity: 0 }, { opacity: 0, offset: .3 }, { opacity: 1 }], { duration: D });
+      if (!nudged) { nudged = true; const dir = TI > 0 ? 1 : -1;   /* once per visit: the row leans toward the other robots so you can see there are more */
+        [...row.children].forEach(sl => sl.animate([{ transform: 'none' }, { transform: `translateX(${dir * 54}px)`, offset: .35 }, { transform: 'none', offset: .7 }, { transform: `translateX(${dir * 14}px)`, offset: .85 }, { transform: 'none' }], { duration: 1300, delay: D + 150, easing: 'ease-in-out' })); }
       const r = band.getBoundingClientRect();   /* bring the whole row, caption and name into view */
       if (r.bottom > innerHeight - 60) scrollBy({ top: Math.min(r.top - head() - 12, r.bottom - innerHeight + 70), behavior: 'smooth' });
       return;
@@ -772,6 +789,11 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
     else if (d.jtgo === 'band') { if (current !== 'home') goHome(); else setBand(true); }
     else if (d.jtgo && M.r[d.jtgo]) go(d.jtgo);
   });
+  /* the entrance waits for the two pictures so nothing pops in halfway (gives up after three seconds) */
+  if (document.documentElement.classList.contains('intro')) {
+    const pics = [$('#car'), $('#tstage img')].filter(Boolean).map(im => im.decode ? im.decode().catch(() => {}) : 0);
+    Promise.race([Promise.all(pics), wait(3000)]).then(() => { fit(); const de = document.documentElement; de.classList.add('play'); de.classList.remove('intro'); setTimeout(() => de.classList.remove('play'), 2400); });
+  }
   const h = location.hash.replace('#r', '');
   if (R[h] && M.r[h]) { hist('replace', { r: h }, location.href); home.hidden = true; cs.hidden = false; current = h;
     cs.innerHTML = caseHTML(h); layoutScene(); $('#ptext').classList.remove('off'); }
