@@ -60,7 +60,11 @@ img { display: block; max-width: 100%; }
   .bar { padding-left: var(--pad); padding-right: var(--pad); }
   .grid { padding-left: var(--pad); padding-right: var(--pad); }
   .band { padding-left: var(--pad) !important; padding-right: var(--pad) !important; }
-  .scene { margin: 0 auto; }
+  .herosec .scene { margin: 0 auto; }
+  /* the robot, its name and the note sit centred in the screen under the header */
+  .case:not([hidden]) { display: flex; flex-direction: column; min-height: calc(100svh - var(--head)); }
+  .case .herosec { margin-top: auto; }
+  .case .soon { margin-bottom: auto; padding-top: 40px; padding-bottom: 72px; }
   /* open: if the robots would come out too small, the two projects above shrink (scaled from the top) to make room */
   .herowrap { transform-origin: 50% 0; }
   #home.open .herowrap { transform: scale(var(--hs, 1)); margin-bottom: calc(var(--hd, 0) * -1px); }
@@ -431,7 +435,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   /* robot-relative frame: front faces -Y, the camera swings toward the robot's right by the last frame's yaw */
   let CAM;
   const setCam = y => { const a = (M.r[y].yaw ?? 35) * Math.PI / 180; CAM = { C: [-DIST * Math.sin(a), -DIST * Math.cos(a)], v: [Math.sin(a), Math.cos(a)] }; };
-  const LEAD = 0.95;  /* line pitch in em */
+  const LEAD = 0.84;  /* line pitch in em */
   const emOf = y => R[y].em || 0.17;   /* letter size in metres; the tall 2025 robot gets a taller name so the pair balances */
   const YS = 0.075, ICON = 0.085;
   const QS = new URLSearchParams(location.search);
@@ -498,10 +502,10 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
       return `<g transform="scale(1 ${L.S})">${year}${name}${link}</g>`;
     }
     const em = emOf(y), base = pl.nameTop + em * 0.72;
-    const name = r.lines.map((l, i) => `<text x="0" y="${mm(base + i * em * LEAD)}" font-size="${mm(em)}" font-weight="800" fill="#151514" letter-spacing="-4">${l}</text>`).join('');
+    const name = r.lines.map((l, i) => `<text class="nmL" x="0" y="${mm(base + i * em * LEAD)}" font-size="${mm(em)}" font-weight="800" fill="#151514" letter-spacing="-4">${l}</text>`).join('');
     const year = `<text x="6" y="${mm(0.02 + YS * 0.72)}" font-size="${mm(YS)}" font-weight="400" fill="#8a8b85">${y}</text>`;
     const s = ICON / 24;
-    const link = linkA(r, `<g transform="translate(${mm(pl.nameW + 0.05)} ${mm(pl.nameTop)}) scale(${mm(s)})">${ICONP}</g>`);
+    const link = linkA(r, `<g class="lk" data-s="${mm(s)}" data-cap="${mm(em * 0.72)}" transform="translate(${mm(pl.nameW + 0.05)} ${mm(pl.nameTop)}) scale(${mm(s)})">${ICONP}</g>`);
     return year + name + link;
   }
   function sceneHTML(y) {
@@ -523,6 +527,10 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
     const pt = $('#ptext'), mode = phone() ? 'floor' : 'stand';
     if (pt.dataset.mode !== mode) { pt.innerHTML = plateSVG(y); pt.dataset.mode = mode; }
     placePlane(pt, textPlane(y), k, ox, oy, 0);
+    /* desktop: the link icon sits just after the last letter of the name (on a two-line name, beside the bottom line) */
+    const last = [...pt.querySelectorAll('text.nmL')].pop(), lk = pt.querySelector('g.lk');
+    if (last && lk) { let len = 0; try { len = last.getComputedTextLength(); } catch (e) {}
+      if (len > 0) lk.setAttribute('transform', `translate(${Math.round(len + 40)} ${Math.round(+last.getAttribute('y') - +lk.dataset.cap)}) scale(${lk.dataset.s})`); }
     if (QS.has('dbg')) {   /* debug: the robot's bumper box and the plate's floor line, projected with the same camera */
       const d = M.r[y].dims, pl = textPlane(y), P = q => { const v = project(q); return ((v[0] - b[0]) * s).toFixed(1) + ',' + ((v[1] - b[1]) * s).toFixed(1); };
       const rect = z => [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, -1]].map(([i, j]) => P([i * d[0] / 2, j * d[1] / 2, z])).join(' ');
