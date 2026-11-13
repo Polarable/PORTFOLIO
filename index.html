@@ -22,7 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
-<script>if (!/^#r\d/.test(location.hash) && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('intro');</script>
+<script>/* the opening plays on a real load or reload of the home page only, never when coming back to it with the browser's back/forward */
+if (!/^#r\d/.test(location.hash) && !matchMedia('(prefers-reduced-motion: reduce)').matches && ((performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}).type !== 'back_forward') document.documentElement.classList.add('intro');</script>
 <style>
 /* Layout (round 3, camera B): the page is the floor. No rules; every robot is rendered by one shared camera
    (85 mm, 4.5 m, eye 45 cm) with its real shadow, so they share a scale and a horizon. The robots are ONE compact tile
@@ -95,7 +96,11 @@ img { display: block; max-width: 100%; }
 .t-cap .lg-miata { height: 14px; transform: translateY(-2.5px); }   /* the script hangs below its baseline; lift it to sit with the caps */
 .t-miata { grid-column: 1 / span 7; cursor: default; }
 .m-stage { position: relative; display: flex; justify-content: center; align-items: flex-end; flex: 1; }
-.m-stage .car { position: relative; z-index: 1; width: calc(var(--cw, 600) * 1px); height: auto; max-width: none; flex: none; }
+.m-stage .car { position: relative; z-index: 1; width: calc(var(--cw, 600) * 1px); height: auto; max-width: none; flex: none; transform: scaleX(-1); }   /* mirrored: the car faces right, so it can drive in from the left edge */
+.m-stage.wip-wait .wip { opacity: 0; }   /* WIP stays dark while the car drives in, then flashes on as it stops */
+.m-stage.wip-flash .wip { animation: wip-flash .5s linear both; }
+@keyframes wip-flash { 0% { opacity: 0; } 10% { opacity: 1; } 22% { opacity: .1; } 36% { opacity: 1; } 48% { opacity: .45; } 62%, 100% { opacity: 1; } }
+.m-stage .drive { position: absolute; z-index: 1; max-width: none; pointer-events: none; will-change: transform; }   /* the drive-in frames, laid exactly over the car */
 .wip { position: absolute; z-index: 0; left: 50%; transform: translateX(-50%); bottom: calc(var(--wb, 40) * 1px);
   font: 900 calc(var(--ws, 300) * 1px)/.74 var(--sans); font-stretch: 112%; letter-spacing: -.03em; color: #747570; white-space: nowrap; pointer-events: none; user-select: none; }
 .t-robots { grid-column: 8 / span 5; cursor: pointer; }
@@ -775,7 +780,8 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   });
   row.addEventListener('pointerover', e => { const b = e.target.closest('.bot'); if (b) frames(b.dataset.y); });
   tile.addEventListener('pointerenter', () => frames(TILE));
-  setTimeout(() => [...ORDER].reverse().forEach(prime), 300);   /* download the turns early (newest first); unpack only on demand */
+  setTimeout(() => [...ORDER].reverse().forEach(prime), document.documentElement.classList.contains('intro') ? 4200 : 300);   /* the opening's drive-in frames go first; the turns follow once it has played */
+  /* download the turns early (newest first); unpack only on demand */
 
   addEventListener('resize', fit);
   $('#car').addEventListener('load', fit);
@@ -786,10 +792,48 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
     else if (d.jtgo === 'band') { if (current !== 'home') goHome(); else setBand(true); }
     else if (d.jtgo && M.r[d.jtgo]) go(d.jtgo);
   });
-  /* the entrance waits for the two pictures so nothing pops in halfway (gives up after three seconds) */
+  /* The Miata drives in from the left edge as the page opens. img/drivein holds rendered frames (a stock NA braking from 40 km/h:
+     nose dive, front lock-up, smoke, settle) on a canvas bigger than the still; meta.json says where the still sits in it (still_at),
+     and how far the car still has to travel in each frame (x, in car-picture widths). The frames are mirrored like the still, and the
+     last frame is the still itself, so the canvas just goes away at the end. Only the frames from where the car reaches the screen are fetched. */
+  function driveIn() {
+    const car = $('#car'), stage = $('#mstage');
+    if (!car || !stage || carPick || !car.offsetWidth || !window.requestAnimationFrame) return Promise.resolve(null);
+    return fetch('img/drivein/meta.json').then(r => r.json()).then(D => {
+      const cw = car.offsetWidth, k = cw / D.still_at[2], N = D.frames;
+      const tier = cw * (devicePixelRatio || 1) <= 700 ? 's' : 'l';
+      const edge = car.getBoundingClientRect().right + D.still_at[0] * k;   /* the car is on screen once it has less than this left to go */
+      let s0 = 0; for (let f = 0; f < N; f++) if (D.x[f] * cw < edge) { s0 = Math.max(0, f - 1); break; }
+      const ims = [], loads = [];
+      for (let f = s0; f < N - 1; f++) { const im = new Image(); im.src = `img/drivein/${tier}/${pad(f)}.webp`; ims[f] = im;
+        loads.push(new Promise((ok, no) => { im.onload = ok; im.onerror = no; })); }
+      return Promise.all(loads).then(() => () => {
+        const cv = document.createElement('canvas'); cv.className = 'drive'; cv.width = D.tiers[tier][0]; cv.height = D.tiers[tier][1];
+        const c2 = cv.getContext('2d');
+        cv.style.cssText = `left:${car.offsetLeft - D.still_at[0] * k}px;top:${car.offsetTop - D.still_at[1] * k}px;width:${D.canvas[0] * k}px;height:${D.canvas[1] * k}px;transform-origin:${D.still_at[0] * k + cw / 2}px 50%`;
+        stage.appendChild(cv); car.style.visibility = 'hidden'; stage.classList.add('wip-wait');
+        const flash = () => { if (!stage.classList.contains('wip-wait')) return; stage.classList.remove('wip-wait'); stage.classList.add('wip-flash'); setTimeout(() => stage.classList.remove('wip-flash'), 700); };
+        const t0 = performance.now(); let shown = -1;
+        const step = now => {
+          const fp = s0 + Math.max(0, now - t0) / 1000 * D.fps, f = Math.floor(fp);
+          if (f >= D.stop) flash();
+          if (f >= N - 1 || !cv.isConnected) { flash(); car.style.visibility = ''; cv.remove(); return; }
+          const x = (D.x[f] + (D.x[f + 1] - D.x[f]) * (fp - f)) * cw;
+          cv.style.transform = `translate3d(${(-x).toFixed(2)}px,0,0) scaleX(-1)`;
+          if (f !== shown) { c2.clearRect(0, 0, cv.width, cv.height); c2.drawImage(ims[f], 0, 0); shown = f; }
+          requestAnimationFrame(step);
+        };
+        step(t0);
+      });
+    }).catch(() => null);
+  }
+  /* the entrance waits for the two pictures so nothing pops in halfway (gives up after three seconds), then up to 1.8 s more for the
+     drive-in frames; on a slow line the page simply opens with the car already parked */
   if (document.documentElement.classList.contains('intro')) {
     const pics = [$('#car'), $('#tstage img')].filter(Boolean).map(im => im.decode ? im.decode().catch(() => {}) : 0);
-    Promise.race([Promise.all(pics), wait(3000)]).then(() => { fit(); const de = document.documentElement; de.classList.add('play'); de.classList.remove('intro'); setTimeout(() => de.classList.remove('play'), 1000); });
+    Promise.race([Promise.all(pics), wait(3000)]).then(() => { fit(); return Promise.race([driveIn(), wait(1800).then(() => null)]); })
+      .then(drive => { fit(); const de = document.documentElement; de.classList.add('play'); de.classList.remove('intro'); setTimeout(() => de.classList.remove('play'), 1000);
+        if (typeof drive === 'function') drive(); });
   }
   const h = location.hash.replace('#r', '');
   if (R[h] && M.r[h]) { hist('replace', { r: h }, location.href); home.hidden = true; cs.hidden = false; current = h;
