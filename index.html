@@ -22,6 +22,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<script>{ const a = (new URLSearchParams(location.search).get('ag') || '').split(/[ ,+]/), de = document.documentElement;   /* ?ag=dwg | hollow | both */
+  de.classList.toggle('ag-dwg', a.includes('dwg') || a.includes('both')); de.classList.toggle('ag-hol', a.includes('hollow') || a.includes('both')); }</script>
+<script>document.documentElement.dataset.bar = new URLSearchParams(location.search).get('bar') || 'corners';</script>
+<script>addEventListener('DOMContentLoaded', () => { const l = new URLSearchParams(location.search).get('logo'); if (l) document.getElementById('logoImg').src = `img/logo-${l}.svg`; });</script>
+<script>document.documentElement.dataset.wip = new URLSearchParams(location.search).get('wip') || 'echo';</script>
 <script>/* the opening plays on a real load or reload of the home page only, never when coming back to it with the browser's back/forward */
 if (!/^#r\d/.test(location.hash) && !matchMedia('(prefers-reduced-motion: reduce)').matches && ((performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}).type !== 'back_forward') document.documentElement.classList.add('intro');</script>
 <style>
@@ -39,7 +44,8 @@ if (!/^#r\d/.test(location.hash) && !matchMedia('(prefers-reduced-motion: reduce
   --maxw: 1440px; --pad: max(var(--m), calc((100vw - var(--maxw)) / 2));
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--paper); color: var(--ink); }
+html { background: var(--paper); }
+html, body { margin: 0; color: var(--ink); }
 body { font: 400 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
@@ -48,7 +54,8 @@ img { display: block; max-width: 100%; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .bar { position: sticky; top: 0; z-index: 20; height: var(--head); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-  padding: 0 max(var(--m), env(safe-area-inset-right, 0px)) 0 max(var(--m), env(safe-area-inset-left, 0px)); background: var(--paper); }
+  padding: 0 max(var(--m), env(safe-area-inset-right, 0px)) 0 max(var(--m), env(safe-area-inset-left, 0px)); transition: background-color .4s ease; }
+html.scrolled .bar, .tabbar { background: rgba(240, 240, 236, .66); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
 .logo img { height: 22px; width: auto; }
 .name { font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 .name b { font-weight: 800; }
@@ -143,9 +150,20 @@ img { display: block; max-width: 100%; }
 .world a:hover .ext { stroke: var(--red); }
 .ptext { transition: opacity .35s ease; }
 .ptext.off { opacity: 0; transition: none; }
-/* ---------- opening the site: the page fades in once, gently, all together ---------- */
-html.intro .bar, html.intro #herowrap { opacity: 0; }
-html.play .bar, html.play #herowrap { animation: in-soft .8s cubic-bezier(.2,.7,.2,1) both; }
+/* ---------- the atmosphere: a soft, grainy light that drifts very slowly behind everything ----------
+   A tiny canvas (about 96 px wide) is painted with a few large pale light and shade pools and stretched over the screen,
+   so the stretch itself does the blurring; a fixed tile of grain sits on top. Redrawn at most ~24 times a second. */
+.atmos, .grain { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.atmos { transition: opacity 2.4s ease; }
+.grain { background-size: 180px 180px; }
+html.intro:not(.lit) .atmos { opacity: 0; }
+
+/* ---------- opening the site: the light comes up, the Miata drives in and stops, WIP flickers on, and only then
+   does everything else fade in, once, all together ---------- */
+html.intro .bar, html.intro .tabbar, html.intro .t-robots, html.intro .more, html.intro .t-miata .t-cap, html.intro:not(.rolling) .car { opacity: 0; pointer-events: none; }
+html.intro.rolling .car { animation: in-car .9s ease both; }
+@keyframes in-car { from { opacity: 0; } }
+html.play .bar, html.play .tabbar, html.play .t-robots, html.play .more, html.play .t-miata .t-cap { animation: in-soft 1.3s cubic-bezier(.2,.7,.2,1) both; }
 @keyframes in-soft { from { opacity: 0; translate: 0 10px; } }
 .soon { padding-top: 56px; padding-bottom: 120px; }
 .soon p { grid-column: 1 / -1; margin: 0; text-align: center; font-size: 15px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; color: #7a7b76; }
@@ -159,7 +177,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   .logo img { height: 18px; }
   .name { justify-self: end; font-size: 12px; }
   .links { display: none; }
-  .tabbar { display: flex; position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; justify-content: space-around; background: var(--paper);
+  .tabbar { display: flex; position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; justify-content: space-around;
     padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
     font-size: 12px; letter-spacing: .06em; text-transform: uppercase; border-top: 1px solid var(--line); }
   .grid { grid-template-columns: minmax(0, 1fr); }
@@ -204,14 +222,251 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   .case .soon { margin-bottom: auto; padding-top: 28px; padding-bottom: 44px; }
   .soon p { font-size: 13px; }
 }
+
+/* ---------- version B: type with gravitas ----------
+   Fewer sizes, lighter and smaller, wide tracking on every small-caps label, one soft near-black and one grey.
+   Words arrive letter by letter (a short rise out of a slight blur), once, after WIP has flickered on;
+   hover captions spell themselves in; links open their tracking a little under the pointer. */
+:root { --ink: #1f1f1d; --mute: #8d8e88; }
+.name { font-size: 11px; font-weight: 600; letter-spacing: .38em; margin-right: -.38em; }
+.name b { font-weight: 600; }
+.links { gap: 36px; font-size: 10.5px; font-weight: 500; letter-spacing: .26em; }
+.links a, .tabbar a { transition: letter-spacing .6s cubic-bezier(.2,.7,.2,1), color .3s ease; }
+.links a:hover { color: var(--ink); letter-spacing: .36em; }
+.t-cap { font-size: 10.5px; font-weight: 600; letter-spacing: .24em; }
+.t-cap .sub { font-weight: 500; }
+.more { font-size: 10px; font-weight: 500; letter-spacing: .5em; padding-left: .5em; color: var(--mute); }
+.cap { font-size: 10.5px; letter-spacing: .24em; top: calc(100% + 10px); }
+.cap b { font-weight: 600; margin-right: 1.1em; }
+.cap span { font-family: var(--sans); letter-spacing: .24em; }
+.soon p { font-size: 10.5px; font-weight: 500; letter-spacing: .5em; padding-left: .5em; color: var(--mute); }
+.wip { color: #7b7c77; }
+/* round 2: WIP is hollow, a fine grey outline with a pale glassy fill, fading out toward the floor so it sinks into the light */
+html.intro:not(.wipped) .wip { opacity: 0; }   /* never visible before its flicker */
+.wip { color: transparent; -webkit-text-stroke: 1.5px rgba(78, 79, 74, .62); letter-spacing: .01em;
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); }
+.wip .wi { display: inline-block; }
+/* lean: tipped back, as if propped up behind the car */
+html[data-wip="lean"] .wip { transform-origin: 50% 100%; transform: translateX(-50%) perspective(calc(var(--ws, 300) * 2.6px)) rotateX(30deg); }
+/* arc: the letters fan out over a gentle arch */
+html[data-wip="arc"] .wip .wi { transform-origin: 50% 100%; }
+html[data-wip="arc"] .wip .wi:nth-child(1) { transform: translateY(.05em) rotate(-6deg); }
+html[data-wip="arc"] .wip .wi:nth-child(2) { transform: translateY(-.04em); }
+html[data-wip="arc"] .wip .wi:nth-child(3) { transform: translateY(.05em) rotate(6deg); }
+/* wrap: the word bends around a big cylinder behind the car, its ends turning away from you */
+html[data-wip="wrap"] .wip { perspective: calc(var(--ws, 300) * 2.2px); }
+html[data-wip="wrap"] .wip .wi:nth-child(1) { transform-origin: 100% 50%; transform: rotateY(-38deg); }
+html[data-wip="wrap"] .wip .wi:nth-child(3) { transform-origin: 0% 50%; transform: rotateY(38deg); }
+/* echo: two fainter outlines trail behind, like the car's wake */
+html[data-wip="echo"] .wip::before, html[data-wip="echo"] .wip::after { content: "WIP"; position: absolute; left: 0; top: 0; color: transparent; pointer-events: none; }
+html[data-wip="echo"] .wip::before { translate: -.07em 0; -webkit-text-stroke: 1.2px rgba(78, 79, 74, .3); }
+html[data-wip="echo"] .wip::after { translate: -.14em 0; -webkit-text-stroke: 1px rgba(78, 79, 74, .14); }
+@media (max-width: 760px) { .wip { -webkit-text-stroke-width: 1.1px; } }
+/* round 6: the top bar. Logo and name lock up on the left (hollow mark, a hairline, the name); the links sit right on the
+   same centre line; a hairline under the bar fades out at both ends. Links underline themselves from the left on hover. */
+:root { --head: 72px; }
+.bar { grid-template-columns: auto auto 1fr; height: var(--head); }
+.bar .logo { display: flex; align-items: center; }
+.bar .logo img { height: 26px !important; }
+.bar .name { justify-self: start; display: flex; align-items: center; height: 20px; margin-left: 18px; padding-left: 18px; border-left: 1px solid rgba(60, 61, 57, .3);
+  font-size: 12px !important; font-weight: 600; letter-spacing: .06em !important; margin-right: 0 !important; }
+.bar::after { content: ""; position: absolute; left: var(--pad); right: var(--pad); bottom: 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(60, 61, 57, .16) 14%, rgba(60, 61, 57, .16) 86%, transparent); }
+.bar .links { gap: 34px !important; font-weight: 500; }
+.bar .links a { position: relative; letter-spacing: .06em !important; }
+.bar .links a::after { content: ""; position: absolute; left: 0; right: .06em; bottom: -6px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+.bar .links a:hover::after, .bar .links a:focus-visible::after { transform: scaleX(1); }
+.bar .links a:hover { color: var(--ink); }
+@media (max-width: 760px) {
+  :root { --head: 60px; }
+  .bar { grid-template-columns: auto auto 1fr; height: var(--head); }
+  .bar .logo img { height: 21px !important; }
+  .bar .name { justify-self: start; margin-left: 14px; padding-left: 14px; height: 18px; font-size: 11.5px !important; }
+  .bar::after { left: 16px; right: 16px; }
+}
+
+/* ---------- top bar options (?bar=lockup | corners | capsule | rails) ---------- */
+/* bars whose parts are pinned to the screen must not move as a block while fading in (a moving parent would drag them) */
+html[data-bar="corners"].play .bar, html[data-bar="rails"].play .bar { animation-name: in-fade; }
+@keyframes in-fade { from { opacity: 0; } }
+html[data-bar="corners"].scrolled .bar, html[data-bar="rails"].scrolled .bar { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-bar="corners"] .bar::after, html[data-bar="rails"] .bar::after, html[data-bar="capsule"] .bar::after { display: none; }
+@media (min-width: 761px) {
+  /* corners: the logo alone top-left, the links stacked in the top-right corner like a gallery label, the name up the left margin */
+  html[data-bar="corners"] .bar .links { grid-column: 3; justify-self: end; text-align: right; flex-direction: column; align-items: flex-end; gap: 7px !important; align-self: start; padding-top: 22px; font-size: 11px; line-height: 1.25; }
+  html[data-bar="corners"] .bar .links a::after { bottom: -2px; }
+  /* rails: name up the left edge, links down the right edge, a hairline along each margin like a drawing sheet's border */
+  html[data-bar="rails"] .bar .name { position: fixed; left: calc(var(--pad) - 29px); top: 50%; height: auto; margin: 0; padding: 0; border: 0;
+    writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg); font-size: 10.5px !important; color: var(--mute); }
+  html[data-bar="rails"] .bar .links { position: fixed; right: calc(var(--pad) - 29px); top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; gap: 30px !important; font-size: 10.5px; }
+  html[data-bar="rails"] .bar .links a::after { left: auto; right: -6px; top: 0; bottom: .06em; width: 1px; height: auto; transform: scaleY(0); transform-origin: 50% 0; }
+  html[data-bar="rails"] .bar .links a:hover::after { transform: scaleY(1); }
+  html[data-bar="rails"] .bar::before { content: ""; position: fixed; left: calc(var(--pad) - 9px); right: calc(var(--pad) - 9px); top: calc(var(--head) - 10px); bottom: 18px; pointer-events: none;
+    border-left: 1px solid rgba(60, 61, 57, .14); border-right: 1px solid rgba(60, 61, 57, .14); }
+  /* capsule: one small frosted pill floating at the top centre */
+  html[data-bar="capsule"] .bar { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); height: 46px; padding: 0 8px 0 22px; display: flex; align-items: center; gap: 0;
+    border: 1px solid rgba(60, 61, 57, .16); border-radius: 999px; background: rgba(248, 248, 244, .5); -webkit-backdrop-filter: blur(16px) saturate(1.1); backdrop-filter: blur(16px) saturate(1.1);
+    box-shadow: 0 10px 30px rgba(40, 40, 36, .06), inset 0 1px 0 rgba(255, 255, 255, .6); }
+  html[data-bar="capsule"] body { padding-top: var(--head); }
+  html[data-bar="capsule"] .bar .logo img { height: 18px !important; }
+  html[data-bar="capsule"] .bar .name { margin-left: 14px; padding-left: 14px; height: 16px; font-size: 11px !important; }
+  html[data-bar="capsule"] .bar .links { margin-left: 18px; padding-left: 4px; gap: 0 !important; font-size: 11px; }
+  html[data-bar="capsule"] .bar .links a { padding: 9px 14px; border-radius: 999px; transition: background-color .3s ease; }
+  html[data-bar="capsule"] .bar .links a::after { display: none; }
+  html[data-bar="capsule"] .bar .links a:hover { background: rgba(255, 255, 255, .7); }
+}
+@media (max-width: 760px) {
+  html[data-bar="capsule"] .bar { margin: 10px 12px 0; height: 46px; border: 1px solid rgba(60, 61, 57, .16); border-radius: 999px; padding: 0 16px;
+    background: rgba(248, 248, 244, .5); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+  html[data-bar="capsule"] .tabbar { left: 0; right: 0; margin: 0 auto; width: max-content !important; white-space: nowrap; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); gap: 4px; padding: 6px;
+    border: 1px solid rgba(60, 61, 57, .16); border-radius: 999px; background: rgba(248, 248, 244, .55); box-shadow: 0 10px 30px rgba(40, 40, 36, .08); }
+  html[data-bar="capsule"] .tabbar a { padding: 10px 16px; }
+  html[data-bar="rails"] .bar::after, html[data-bar="corners"] .bar::after { display: block; }
+}
+/* corners lockup: logo and name balanced as one unit (logo about twice the cap height, gap about the logo's height less a third) */
+html[data-bar="corners"] .bar .logo img { height: 22px !important; }
+html[data-bar="corners"] .bar .name { border-left: 0 !important; padding-left: 0 !important; margin-left: 16px !important; height: auto; align-self: center;
+  font-size: 14px !important; font-weight: 500; letter-spacing: .03em !important; }
+html[data-bar="corners"] .bar .name b { font-weight: inherit; }
+.tabname { display: none; }
+/* phones (corners): the logo alone, centred at the top; the name moves down into the bottom bar, above the links */
+@media (max-width: 760px) {
+  html[data-bar="corners"] .bar { grid-template-columns: 1fr; justify-items: center; }
+  html[data-bar="corners"] .bar .logo img { height: 20px !important; }
+  html[data-bar="corners"] .bar .name { display: none; }
+  html[data-bar="corners"] .tabbar { flex-wrap: wrap; row-gap: 9px; padding-top: 12px; }
+  html[data-bar="corners"] .tabname { display: block; flex: 0 0 100%; text-align: center; font-size: 10.5px; font-weight: 500; letter-spacing: .06em; color: var(--mute); }
+  html[data-bar="corners"] .case:not([hidden]) { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+}
+/* round 3: normal letter spacing everywhere (sizes nudged up a touch to suit), and a bigger mark in the corner */
+.logo img { height: 30px; }
+.name { font-size: 12px; letter-spacing: .06em; margin-right: 0; }
+.links { gap: 30px; font-size: 11.5px; letter-spacing: .06em; }
+.links a:hover { letter-spacing: .12em; }
+.t-cap { font-size: 11.5px; letter-spacing: .05em; }
+.more { font-size: 11px; letter-spacing: .08em; padding-left: 0; }
+.cap { font-size: 11.5px; letter-spacing: .05em; }
+.cap b { margin-right: .6em; }
+.cap span { letter-spacing: .05em; }
+.soon p { font-size: 12px; letter-spacing: .06em; padding-left: 0; }
+@media (max-width: 760px) {
+  html .logo img { height: 24px; }   /* (html prefix: these must beat version B's phone rules further down) */
+  html .name { font-size: 11.5px; letter-spacing: .06em; margin-right: 0; }
+  html .tabbar { font-size: 11px; letter-spacing: .06em; }
+  html .mcap { font-size: 11.5px; letter-spacing: .05em; }
+  html .mcap b { margin-right: .6em; }
+  html .mcap .yr { letter-spacing: .05em; }
+  html .more { font-size: 10.5px; }
+}
+@media (max-width: 760px) {
+  .name { font-size: 10.5px; letter-spacing: .32em; margin-right: -.32em; }
+  .tabbar { font-size: 10px; letter-spacing: .26em; font-weight: 500; }
+  .mcap { font-size: 10.5px; letter-spacing: .22em; }
+  .mcap b { font-weight: 600; margin-right: 1em; }
+  .mcap .yr { font-family: var(--sans); letter-spacing: .22em; }
+  .more { font-size: 9.5px; padding-top: 52px; }
+}
+/* the letters */
+.kin .ch { display: inline-block; white-space: pre;
+  transition: opacity .9s ease, translate 1.3s cubic-bezier(.16,.8,.2,1), filter 1s ease; transition-delay: calc(var(--i) * 42ms + var(--d, 0ms)); }
+html.intro .kin .ch, .kin.re .ch { opacity: 0; translate: 0 .55em; filter: blur(3px); transition: none; }
+/* desktop: hover captions spell themselves in, and let go quickly */
+@media (hover: hover) and (min-width: 761px) {
+  .t-cap .nm { opacity: 1; }
+  .t-cap .nm .lg { opacity: 0; transition: opacity .25s ease; }
+  .tile:hover .nm .lg, .tile:focus-visible .nm .lg { opacity: 1; transition-duration: .7s; }
+  .t-cap .kin .ch, .cap .kin .ch { opacity: 0; translate: 0 .5em; filter: blur(2px); transition: opacity .18s ease, translate .18s ease, filter .18s ease; }
+  .tile:hover .kin .ch, .tile:focus-visible .kin .ch, .bot:hover .kin .ch, .bot:focus-visible .kin .ch { opacity: 1; translate: 0; filter: none;
+    transition: opacity .6s ease, translate .9s cubic-bezier(.16,.8,.2,1), filter .6s ease; transition-delay: calc(var(--i) * 30ms + 80ms); }
+  .cap { opacity: 1 !important; }
+}
+@media (prefers-reduced-motion: reduce) { .kin .ch { transition: none !important; filter: none !important; translate: none !important; } }
+
+/* ---------- version C: the soft-club layer (decoration in greys only; the cars, robots and logos keep their colour) ----------
+   Faint line drawings traced from the 2025 robot's top and side renders drift very slowly behind everything, a grey wash of
+   the 2026 robot is feathered into the bottom corner, a few light streaks sweep past as the Miata stops, and his
+   hand-drawn mark signs the corner. All of it sits under the grain, so it reads as printed. */
+.soft { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.soft img { position: absolute; max-width: none; height: auto; }
+.soft .bp-top { width: 50vw; left: -7vw; top: 6vh; opacity: .085; animation: drift-a 70s ease-in-out infinite alternate; }
+.soft .bp-side { width: 30vw; right: -3vw; top: -4vh; opacity: .07; animation: drift-b 90s ease-in-out infinite alternate; }
+.soft .wash { width: 52vw; right: -12vw; bottom: -22vh; opacity: .075; filter: grayscale(1) contrast(1.25);
+  -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent 100%); mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
+  animation: drift-a 110s ease-in-out infinite alternate-reverse; }
+@keyframes drift-a { to { transform: translate3d(1.6vw, -1.2vh, 0) rotate(.6deg); } }
+@keyframes drift-b { to { transform: translate3d(-1.4vw, 1.6vh, 0) rotate(-.5deg); } }
+html.intro:not(.lit) .soft { opacity: 0; }
+/* round 5: a faint floor in perspective, drawn with the renders' own camera (eye 45 cm, 85 mm). Home: square to you, vanishing
+   at the middle of the screen at the robots' horizon. Robot pages: lined up with the robot's frame, so its lines run to the same
+   vanishing points as its bumpers. No labels; it fades out toward the horizon. */
+.soft .persp { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+.soft .persp { opacity: 0; transition: opacity .2s ease; }
+.soft .persp.on { opacity: 1; transition: opacity 4.5s cubic-bezier(.45,0,.25,1); }
+.persp .g { fill: none; stroke: rgba(60, 61, 57, .12); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+.soft { transition: opacity 3s ease; }
+
+
+@media (max-width: 760px) {
+  .soft .bp-top { width: 120vw; left: -10vw; top: 14vh; opacity: .07; animation: none; }
+  .soft .bp-side, .soft .wash { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .soft img { animation: none !important; } }
+
+/* ---------- idea 1, "drawing set" (html.ag-dwg): the site reads like a sheet from an engineering drawing set.
+   Hairline dimension lines with true sizes (the NA's 3,970 mm length, each robot's 870 mm frame with bumpers),
+   a leader-line callout, registration marks in the corners and a title block that names the sheet. Greys only. */
+.dims { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; display: none; }
+html.ag-dwg .dims { display: block; }
+.t-robots .dims { transition: opacity .25s ease; }
+.t-robots[aria-expanded="true"] .dims { opacity: .16; }
+@media (max-width: 760px) { #home.open .t-robots .dims { display: none; } }
+.dims .dl { fill: none; stroke: rgba(70, 71, 67, .55); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.dims .dx { fill: none; stroke: rgba(70, 71, 67, .3); stroke-width: 1; stroke-dasharray: 2 3; }
+.dims .dt { font: 500 10.5px var(--sans); letter-spacing: .05em; fill: #6f706b; text-transform: uppercase; paint-order: stroke; stroke: #eeeeea; stroke-width: 5px; stroke-linejoin: round; }
+.tblock, .reg { display: none; }
+@media (min-width: 761px) {
+  html.ag-dwg .tblock { display: grid; position: fixed; z-index: 3; right: var(--pad); bottom: 26px; grid-template-columns: auto auto; border: 1px solid rgba(70, 71, 67, .35);
+    font: 500 9.5px/1 var(--sans); letter-spacing: .05em; text-transform: uppercase; color: #6f706b; pointer-events: none; }
+  .tblock > div { display: flex; gap: 10px; justify-content: space-between; padding: 6px 9px; border-right: 1px solid rgba(70, 71, 67, .2); border-bottom: 1px solid rgba(70, 71, 67, .2); min-width: 118px; }
+  .tblock > div:nth-child(2n) { border-right: 0; }
+  .tblock > div:nth-last-child(-n+2) { border-bottom: 0; }
+  .tblock span { color: #a2a39d; }
+  .tblock b { font-weight: 600; color: #3d3e3a; }
+  html.ag-dwg .reg { display: block; position: fixed; z-index: 3; width: 13px; height: 13px; pointer-events: none;
+    background: linear-gradient(rgba(70,71,67,.45), rgba(70,71,67,.45)) center / 1px 100% no-repeat, linear-gradient(rgba(70,71,67,.45), rgba(70,71,67,.45)) center / 100% 1px no-repeat; }
+  .reg.tl { left: calc(var(--pad) - 26px); top: calc(var(--head) + 6px); } .reg.tr { right: calc(var(--pad) - 26px); top: calc(var(--head) + 6px); }
+  .reg.bl { left: calc(var(--pad) - 26px); bottom: 20px; } .reg.br { right: calc(var(--pad) - 26px); bottom: 20px; }
+}
+html.intro .dims, html.intro .tblock, html.intro .reg { opacity: 0; }
+html.play .dims, html.play .tblock, html.play .reg { animation: in-soft 1.3s cubic-bezier(.2,.7,.2,1) .25s both; }
+
+/* ---------- idea 2, "hollow house style" (html.ag-hol): the Echo outline from WIP becomes the site's one recurring shape.
+   The team number stands hollow behind the robots tile, and each robot page has its year hollow behind the robot. */
+.echo { position: absolute; z-index: 0; color: transparent; -webkit-text-stroke: 1.4px rgba(78, 79, 74, .5); font-weight: 900; font-stretch: 112%; line-height: .74;
+  letter-spacing: .01em; white-space: nowrap; pointer-events: none; user-select: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); }
+.echo::before, .echo::after { content: attr(data-t); position: absolute; left: 0; top: 0; color: transparent; }
+.echo::before { translate: -.07em 0; -webkit-text-stroke: 1.2px rgba(78, 79, 74, .26); }
+.echo::after { translate: -.14em 0; -webkit-text-stroke: 1px rgba(78, 79, 74, .12); }
+.hol { display: none; }
+html.ag-hol .hol { display: block; }
+.t-robots .hol { left: 50%; translate: -50% 0; transition: opacity .25s ease; }
+.t-robots[aria-expanded="true"] .hol { opacity: .25; }
+.t-stage { position: relative; z-index: 1; }
+.scene .hol { left: 0; top: 0; }
+.scene .heroimg { z-index: 1; }
+@media (max-width: 760px) { .echo { -webkit-text-stroke-width: 1.1px; } #home.open .t-robots .hol { display: none; } }
 @media (prefers-reduced-motion: reduce) { .bot, .cap, .case, .toggle, .t-stage img, .t-cap .nm, .ptext { transition: none !important; } }
 </style>
 </head>
 <body>
+<canvas class="atmos" id="atmos" aria-hidden="true"></canvas><div class="soft" aria-hidden="true"><svg class="persp" id="persp" aria-hidden="true"></svg><img class="bp-top" src="img/soft/bp-2025-top.webp" alt=""><img class="bp-side" src="img/soft/bp-2025-side.webp" alt=""><img class="wash" src="img/2026-front.webp" alt=""></div><div class="grain" id="grain" aria-hidden="true"></div>
 <header class="bar">
-  <a class="logo" href="#home" data-go="home" aria-label="Home"><img src="img/logo-ink.svg" alt="JT"></a>
-  <div class="name"><b>Jarrett</b> Hutto</div>
-  <nav class="links" aria-label="Links"><a href="#home" data-go="home">Resume</a><a href="mailto:jarrett@jthutto.com">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener">LinkedIn</a></nav>
+  <a class="logo" href="#home" data-go="home" aria-label="Home"><img src="img/logo-line.svg" alt="JT" id="logoImg"></a>
+  <div class="name" data-kin="0"><b>Jarrett</b> Hutto</div>
+  <nav class="links" aria-label="Links"><a href="#home" data-go="home" data-kin="420">Resume</a><a href="mailto:jarrett@jthutto.com" data-kin="560">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener" data-kin="700">LinkedIn</a></nav>
 </header>
 
 <main id="home">
@@ -219,19 +474,19 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   <div class="herowrap" id="herowrap">
   <div class="hero grid">
     <div class="tile t-miata" aria-label="Miata, coming soon">
-      <div class="m-stage" id="mstage"><span class="wip" aria-hidden="true">WIP</span><img class="car" id="car" src="img/miata-side.webp" alt="Mazda Miata NA, grey clay model"></div>
-      <span class="t-cap"><span class="nm"><img class="lg lg-miata" src="brand/miata.svg" alt="Miata"><span class="sub">Coming soon</span></span></span>
+      <div class="m-stage" id="mstage"><span class="wip" aria-hidden="true"><span class="wi">W</span><span class="wi">I</span><span class="wi">P</span></span><img class="car" id="car" src="img/miata-side.webp" alt="Mazda Miata NA, grey clay model"></div>
+      <span class="t-cap"><span class="nm"><img class="lg lg-miata" src="brand/miata.svg" alt="Miata"><span class="sub" data-kin="200">Coming soon</span></span></span>
     </div>
     <button type="button" class="tile t-robots" id="robotsTile" aria-expanded="false" aria-controls="band" aria-label="FIRST Robotics, FRC 4639 robots">
-      <span class="t-stage" id="tstage"></span>
-      <span class="t-cap"><span class="nm"><img class="lg lg-first" src="brand/first.webp" alt="FIRST"><span>Robotics</span></span><span class="toggle" aria-hidden="true">+</span></span>
+      <span class="hol echo" id="holT" data-t="4639" aria-hidden="true">4639</span><span class="t-stage" id="tstage"></span>
+      <span class="t-cap"><span class="nm"><img class="lg lg-first" src="brand/first.webp" alt="FIRST"><span data-kin="300">Robotics</span></span><span class="toggle" aria-hidden="true">+</span></span>
     </button>
   </div>
-  <p class="more">More coming soon</p>
+  <p class="more" data-kin="900">More coming soon</p>
   </div>
   <section class="band" id="band" aria-label="FRC 4639 robots" hidden>
     <div class="row" id="row"></div>
-    <button type="button" class="t-cap bcap" id="bcap" aria-label="Close FIRST Robotics"><span class="nm"><img class="lg lg-first" src="brand/first.webp" alt="FIRST"><span>Robotics</span></span><span class="toggle" aria-hidden="true">+</span></button>
+    <button type="button" class="t-cap bcap" id="bcap" aria-label="Close FIRST Robotics"><span class="nm"><img class="lg lg-first" src="brand/first.webp" alt="FIRST"><span data-kin="300">Robotics</span></span><span class="toggle" aria-hidden="true">+</span></button>
     <div class="mcap" id="mcap"><span><b id="mname"></b><span class="yr" id="myear"></span></span><span class="dots" id="dots"></span></div>
     <div class="band-foot"></div>
   </section>
@@ -239,8 +494,74 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
 </main>
 
 <main id="case" class="case" hidden></main>
-<nav class="tabbar" aria-label="Links"><a href="#home" data-go="home">Resume</a><a href="mailto:jarrett@jthutto.com">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener">LinkedIn</a></nav>
+<div class="tblock" id="tblock" aria-hidden="true"><div><span>Title</span><b id="tbT">Portfolio</b></div><div><span>Sheet</span><b id="tbS">01 / 04</b></div>
+<div><span>Drawn</span><b>J. Hutto</b></div><div><span>Scale</span><b id="tbC">NTS</b></div></div>
+<i class="reg tl" aria-hidden="true"></i><i class="reg tr" aria-hidden="true"></i><i class="reg bl" aria-hidden="true"></i><i class="reg br" aria-hidden="true"></i>
+<nav class="tabbar" aria-label="Links"><span class="tabname">Jarrett Hutto</span><a href="#home" data-go="home" data-kin="420">Resume</a><a href="mailto:jarrett@jthutto.com" data-kin="560">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener" data-kin="700">LinkedIn</a></nav>
 
+<script>
+/* the atmosphere (see the CSS). Light pools are pale versions of the paper; nothing here is darker than a light grey. */
+(() => {
+  const cv = document.getElementById('atmos'), gr = document.getElementById('grain');
+  if (!cv || !cv.getContext) return;
+  const q = new URLSearchParams(location.search), AMT = +(q.get('bg') || 1);   /* ?bg=0.5 softer, ?bg=1.5 stronger */
+  /* grain: one 180 px tile of fine light and dark specks */
+  const g = document.createElement('canvas'); g.width = g.height = 180; const gx = g.getContext('2d'), gd = gx.createImageData(180, 180);
+  for (let i = 0; i < gd.data.length; i += 4) { const v = Math.random(), lt = v > .5; gd.data[i] = gd.data[i + 1] = gd.data[i + 2] = lt ? 255 : 40; gd.data[i + 3] = Math.abs(v - .5) * 2 * (lt ? 34 : 22); }
+  gx.putImageData(gd, 0, 0); gr.style.backgroundImage = `url(${g.toDataURL()})`;
+  const P = [240, 240, 236];
+  /* pools: colour, strength, radius (share of the long side), home (x, y), drift (x, y amplitude), periods in seconds, phase */
+  const POOLS = [
+    { c: [253, 253, 251], a: .95, r: .60, h: [.72, .22], d: [.34, .26], t: [29, 23], p: 0.0 },
+    { c: [206, 207, 200], a: .72, r: .56, h: [.18, .78], d: [.30, .24], t: [37, 26], p: 1.7 },
+    { c: [250, 250, 247], a: .85, r: .46, h: [.32, .30], d: [.32, .30], t: [24, 33], p: 3.1 },
+    { c: [216, 217, 211], a: .66, r: .50, h: [.86, .84], d: [.28, .30], t: [41, 31], p: 4.4 },
+    { c: [228, 229, 224], a: .60, r: .40, h: [.50, .55], d: [.40, .34], t: [19, 27], p: 2.2 },
+  ];
+  const cx = cv.getContext('2d', { alpha: false }); let W = 0, H = 0;
+  const size = () => { const ar = innerHeight / Math.max(1, innerWidth); W = 96; H = Math.max(24, Math.round(96 * ar)); cv.width = W; cv.height = H; };
+  const draw = t => {
+    cx.fillStyle = `rgb(${P})`; cx.fillRect(0, 0, W, H);
+    const L = Math.max(W, H);
+    for (const o of POOLS) {
+      const x = (o.h[0] + o.d[0] * Math.sin(t / o.t[0] * 6.283 + o.p)) * W, y = (o.h[1] + o.d[1] * Math.sin(t / o.t[1] * 6.283 + o.p * 1.3)) * H;
+      const r = o.r * L * (1 + .16 * Math.sin(t / 11 + o.p)), a = Math.min(1, o.a * AMT);
+      const gg = cx.createRadialGradient(x, y, 0, x, y, r), c = o.c.join(',');
+      gg.addColorStop(0, `rgba(${c},${a})`); gg.addColorStop(.45, `rgba(${c},${a * .55})`); gg.addColorStop(1, `rgba(${c},0)`);
+      cx.fillStyle = gg; cx.fillRect(0, 0, W, H);
+    }
+  };
+  size(); addEventListener('resize', () => { size(); draw(clock()); });
+  const T0 = performance.now() - 20000 * Math.random(), clock = () => (performance.now() - T0) / 1000;
+  draw(clock());
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;   /* still light, no drift */
+  const STEP = 1000 / 30; let last = 0;
+  const tick = now => { if (now - last >= STEP) { last = now; draw(clock()); } requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+})();
+/* the header gets a frosted backing only once the page has scrolled under it */
+addEventListener('scroll', () => document.documentElement.classList.toggle('scrolled', scrollY > 2), { passive: true });
+</script>
+<script>
+/* version B: split words into letters for the kinetic type. kin(el) splits once; kin(el, true) re-plays the entrance. */
+window.kin = (el, replay) => {
+  if (!el) return;
+  const txt = el.textContent;
+  if (el.dataset.kt !== txt) {   /* (re)split when the words changed */
+    if (el.dataset.kin !== undefined) el.style.setProperty('--d', (+el.dataset.kin || 0) + 'ms');
+    let i = 0;
+    const walk = n => { [...n.childNodes].forEach(c => {
+      if (c.nodeType === 3) { const f = document.createDocumentFragment();
+        for (const chr of c.textContent) { const sp = document.createElement('span'); sp.className = 'ch'; sp.style.setProperty('--i', i++); sp.textContent = chr; f.appendChild(sp); }
+        c.replaceWith(f); }
+      else if (c.nodeType === 1 && !c.classList.contains('ch')) walk(c); }); };
+    walk(el); el.classList.add('kin'); el.dataset.kt = el.textContent;
+    if (!el.closest('a, button') && !el.getAttribute('aria-label')) el.setAttribute('aria-label', txt.trim());
+  }
+  if (replay) { el.classList.add('re'); void el.offsetWidth; el.classList.remove('re'); }
+};
+document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[data-kin]').forEach(el => kin(el)));
+</script>
 <script src="turn/meta-v13.js"></script>
 <script>
 (() => {
@@ -280,6 +601,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   $('#dots').innerHTML = ORDER.map(() => '<i></i>').join('');
   $('#tstage').innerHTML = imgTag(TILE, '--kt').replace('style="', `style="margin-top:calc(var(--kt) * ${(-(M.r[TILE].topQ - 0.03) * BH).toFixed(1)}px);`);
   row.innerHTML = ORDER.map((y, i) => `<div class="slide" data-i="${i}"><a class="bot" href="#r${y}" data-y="${y}" aria-label="${R[y].name}, ${y}">${imgTag(y, '--k')}<span class="cap"><b>${R[y].name}</b><span>${y}</span></span></a></div>`).join('');
+  row.querySelectorAll('.cap').forEach(c => kin(c));
 
   const sumW = () => ORDER.reduce((s, y) => s + tightW(y), 0);
   /* the Miata render: its crop and where its tyres meet the floor (fraction of image height from the bottom) */
@@ -287,6 +609,96 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   const carPick = new URLSearchParams(location.search).get('car'), CAR = { floor: CARS[carPick] || CARS.side };
   $('#car').src = `img/miata-${CARS[carPick] ? carPick : 'side'}.webp`;
   let HS = 1;
+
+
+  /* ---------- the perspective floor (see the CSS) ---------- */
+  function persp(lines, c, rx, ry) {
+    const sv = $('#persp'); if (!sv) return;
+    if (!lines) { sv.classList.remove('on'); sv.innerHTML = ''; return; }
+    const W = innerWidth, H = innerHeight, f = v => v.toFixed(1);
+    const d = lines.map(([a, b]) => `M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}`).join('');
+    /* only a pool of floor around the robot: an ellipse lying on the floor, fading out to nothing */
+    sv.innerHTML = `<defs><radialGradient id="pf" gradientUnits="userSpaceOnUse" cx="${f(c[0])}" cy="${f(c[1])}" r="${f(rx)}" gradientTransform="translate(${f(c[0])} ${f(c[1])}) scale(1 ${(ry / rx).toFixed(3)}) translate(${f(-c[0])} ${f(-c[1])})">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset=".45" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <mask id="pm" maskUnits="userSpaceOnUse" x="-10" y="-10" width="${W + 20}" height="${H + 20}"><rect x="-10" y="-10" width="${W + 20}" height="${H + 20}" fill="url(#pf)"/></mask></defs>
+      <path class="g" mask="url(#pm)" d="${d}"/>`;
+    if (!sv.classList.contains('on')) { clearTimeout(persp.t); persp.t = setTimeout(() => sv.classList.add('on'), 1100); }   /* comes up slowly once the robot has landed */
+  }
+  /* clip a floor segment (world metres) to what is in front of the camera, then project it through cam (a world -> screen fn) */
+  function floorSeg(A, B, depth, scr, near = 0.7) {
+    let a = A, b = B; const da = depth(a), db = depth(b);
+    if (da < near && db < near) return null;
+    if (da < near) { const t = (near - da) / (db - da); a = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
+    if (db < near) { const t = (near - db) / (da - db); b = [b[0] + (a[0] - b[0]) * t, b[1] + (a[1] - b[1]) * t]; }
+    return [scr(a), scr(b)];
+  }
+  function perspHome() { if (current === 'home') persp(null); }
+  function perspScene(y, b, s, sc) {
+    const rc = sc.getBoundingClientRect(), P = q => { const v = project([q[0], q[1], 0]); return [rc.left + (v[0] - b[0]) * s, rc.top + (v[1] - b[1]) * s]; };
+    const depth = q => toCam([q[0], q[1], 0])[2], hy = rc.top + (HZ - b[1]) * s;
+    const L = [], X = 8, st = 0.5, o = M.r[y].dims.map(v => v / 2);   /* lines on the bumper edges' grid, so the frame sits on it */
+    for (let i = -Math.round(X / st); i <= Math.round(X / st); i++) {
+      const u = o[0] + i * st, v = o[1] + i * st;
+      const a1 = floorSeg([u, -X * 2], [u, X * 2], depth, P), a2 = floorSeg([-X * 2, v], [X * 2, v], depth, P);
+      if (a1) L.push(a1); if (a2) L.push(a2);
+    }
+    const ctr = P([0, 0]), side = P([o[0] * 2.6, 0]), rx = Math.max(140, Math.abs(side[0] - ctr[0]) * 1.9);
+    persp(L, ctr, rx, rx * 0.42);
+  }
+  /* ---------- ideas 1 and 2 (see the CSS) ---------- */
+  const NS = 'http://www.w3.org/2000/svg', DE = document.documentElement;
+  const dimH = (x0, x1, y, ye, lab) => { const m = (x0 + x1) / 2, g = lab.length * 3.4 + 9;
+    return `<path class="dl" d="M${x0} ${ye}V${y + 6}M${x1} ${ye}V${y + 6}M${x0} ${y}H${m - g}M${m + g} ${y}H${x1}M${x0 - 4} ${y + 4}l8 -8M${x1 - 4} ${y + 4}l8 -8"/>`
+      + `<text class="dt" x="${m}" y="${y + 3.6}" text-anchor="middle">${lab}</text>`; };
+  const svgIn = (host, cls) => { let sv = host.querySelector('svg.' + cls); if (!sv) { sv = document.createElementNS(NS, 'svg'); sv.setAttribute('class', cls); sv.setAttribute('aria-hidden', 'true'); host.appendChild(sv); } return sv; };
+  const sheet = y => { const i = y ? ORDER.slice().reverse().indexOf(y) + 2 : 1; return String(i).padStart(2, '0') + ' / ' + String(ORDER.length + 1).padStart(2, '0'); };
+  function tblock(y, scale) { if (!$('#tbT')) return; $('#tbT').textContent = y ? R[y].name : 'Portfolio'; $('#tbS').textContent = sheet(y); $('#tbC').textContent = scale || 'NTS'; }
+  function agHome() {
+    const tm = $('.t-miata'), car = $('#car'), tr = $('#robotsTile'), im = $('#tstage img');
+    if (DE.classList.contains('ag-dwg') && car && car.offsetWidth) {
+      const a = tm.getBoundingClientRect(), c = car.getBoundingClientRect(), fy = c.bottom - a.top - c.height * CAR.floor;
+      svgIn(tm, 'dims').innerHTML = dimH(c.left - a.left + c.width * 0.054, c.left - a.left + c.width * 0.946, fy + 16, fy - c.height * 0.2, '3,970 mm');
+      if (im && im.offsetWidth) { const b = tr.getBoundingClientRect(), r = im.getBoundingClientRect(), ry = r.top - b.top + r.height * 0.9;
+        svgIn(tr, 'dims').innerHTML = dimH(r.left - b.left + r.width * 0.19, r.left - b.left + r.width * 0.81, ry + 16, ry - r.height * 0.12, '870 mm'); }
+      if (current === 'home') tblock(null);
+    }
+    if (DE.classList.contains('ag-hol') && im && im.offsetWidth) {
+      const b = tr.getBoundingClientRect(), r = im.getBoundingClientRect(), h = $('#holT'), fs = b.width * 0.33;
+      h.style.fontSize = fs.toFixed(1) + 'px'; h.style.top = (r.top - b.top + r.height * 0.9 - fs * 0.74).toFixed(1) + 'px';
+    }
+  }
+  function agScene(y, b, s, sc) {
+    if (DE.classList.contains('ag-hol')) {
+      let h = sc.querySelector('.hol'); if (!h) { h = document.createElement('span'); h.className = 'hol echo'; h.setAttribute('aria-hidden', 'true'); sc.prepend(h); }
+      h.textContent = h.dataset.t = y; const fs = sc.offsetHeight * (phone() ? 0.42 : 0.5); h.style.fontSize = fs.toFixed(1) + 'px';
+      h.style.top = (phone() ? sc.offsetHeight * 0.02 : sc.offsetHeight * 0.06).toFixed(1) + 'px'; h.style.left = (phone() ? -8 : -sc.offsetWidth * 0.04).toFixed(1) + 'px';
+    }
+    if (!DE.classList.contains('ag-dwg')) return;
+    const d = M.r[y].dims, P = q => { const v = project(q); return [(v[0] - b[0]) * s, (v[1] - b[1]) * s]; };
+    const C = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => [i * d[0] / 2, j * d[1] / 2]);
+    const E = [0, 1, 2, 3].map(i => [C[i], C[(i + 1) % 4]]).map(([A, B]) => ({ A, B, my: (P([...A, 0])[1] + P([...B, 0])[1]) / 2 }))
+      .sort((u, v) => v.my - u.my).slice(0, phone() ? 0 : 2);   /* the two edges nearest you (phone: none, the name is painted there) */
+    let out = '', scale = '';
+    for (const { A, B } of E) {
+      const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, L = Math.hypot(mx, my), n = [mx / L, my / L], o = 0.17;
+      const off = (Q, t) => P([Q[0] + n[0] * t, Q[1] + n[1] * t, 0]), a = off(A, o), bb = off(B, o);
+      const len = Math.round(Math.hypot(B[0] - A[0], B[1] - A[1]) * 1000);
+      const ang = Math.atan2(bb[1] - a[1], bb[0] - a[0]) * 180 / Math.PI, rd = ang > 90 || ang < -90 ? ang + 180 : ang;
+      const m = [(a[0] + bb[0]) / 2, (a[1] + bb[1]) / 2], ux = [(bb[0] - a[0]), (bb[1] - a[1])], ul = Math.hypot(...ux), u = [ux[0] / ul, ux[1] / ul], g = 20;
+      const t1 = [m[0] - u[0] * g, m[1] - u[1] * g], t2 = [m[0] + u[0] * g, m[1] + u[1] * g], e0 = off(A, 0.03), e1 = off(A, o + 0.05), f0 = off(B, 0.03), f1 = off(B, o + 0.05);
+      const f = v => v.map(z => z.toFixed(1)).join(' ');
+      out += `<path class="dl" d="M${f(e0)}L${f(e1)}M${f(f0)}L${f(f1)}M${f(a)}L${f(t1)}M${f(t2)}L${f(bb)}M${a[0] - 4} ${a[1] + 4}l8 -8M${bb[0] - 4} ${bb[1] + 4}l8 -8"/>`
+        + `<text class="dt" text-anchor="middle" transform="translate(${f(m)}) rotate(${rd.toFixed(1)})" y="3.6">${len}</text>`;
+      if (!scale) { const ppm = Math.hypot(bb[0] - a[0], bb[1] - a[1]) / Math.hypot(B[0] - A[0], B[1] - A[1]); scale = '1:' + Math.round(1000 / (ppm * 0.2646)); }
+    }
+    if (E.length) {   /* a leader to the bumper at the corner nearest you */
+      const near = C.map(Q => P([...Q, 0.07])).sort((u, v) => v[1] - u[1])[0], k2 = [near[0] - 46, near[1] + 70];
+      out += `<path class="dl" d="M${near[0].toFixed(1)} ${near[1].toFixed(1)}L${k2[0].toFixed(1)} ${k2[1].toFixed(1)}h-22"/><circle cx="${near[0].toFixed(1)}" cy="${near[1].toFixed(1)}" r="2" fill="#6f706b"/>`
+        + `<text class="dt" x="${(k2[0] - 26).toFixed(1)}" y="${(k2[1] + 3.6).toFixed(1)}" text-anchor="end">Bumper</text>`;
+    }
+    const sv = svgIn(sc, 'dims'); sv.innerHTML = out; tblock(y, scale);
+  }
+  new MutationObserver(() => { if (!$('#home').hidden) { tblock(null); requestAnimationFrame(perspHome); } }).observe($('#home'), { attributes: true, attributeFilter: ['hidden'] });
   function fit() {
     const root = document.documentElement.style;
     const avail = innerHeight - head() - (phone() ? 50 : 0);
@@ -325,6 +737,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
     root.setProperty('--kf', (phone() ? (innerWidth - 32) * 0.98 / sumW() : 0.5 * (innerWidth - 80) / sumW()).toFixed(4));
     fitRow();
     if (current !== 'home') layoutScene();
+    agHome(); perspHome();
   }
 
   row.addEventListener('pointerover', e => { if (!phone() && e.target.closest('.bot')) row.classList.add('hovering'); });
@@ -333,7 +746,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   function setActive(i) {
     active = i; if (open && cache[ORDER[i]]) frames(ORDER[i]);   /* unpack the robot now in the middle of the phone swipe */
     row.querySelectorAll('.slide').forEach((s, j) => s.classList.toggle('on', j === i));
-    $('#mname').textContent = R[ORDER[i]].name; $('#myear').textContent = ORDER[i];
+    if ($('#mname').textContent !== R[ORDER[i]].name) { $('#mname').textContent = R[ORDER[i]].name; $('#myear').textContent = ORDER[i]; kin($('#mcap').firstElementChild, true); }
     $('#dots').querySelectorAll('i').forEach((d, j) => d.classList.toggle('on', j === i));
     fitRow();
   }
@@ -550,6 +963,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
     const last = [...pt.querySelectorAll('text.nmL')].pop(), lk = pt.querySelector('g.lk');
     if (last && lk) { let len = 0; try { len = last.getComputedTextLength(); } catch (e) {}
       if (len > 0) lk.setAttribute('transform', `translate(${Math.round(len + 40)} ${Math.round(+last.getAttribute('y') - +lk.dataset.cap)}) scale(${lk.dataset.s})`); }
+    agScene(y, b, s, sc); perspScene(y, b, s, sc);
     if (QS.has('dbg')) {   /* debug: the robot's bumper box and the plate's floor line, projected with the same camera */
       const d = M.r[y].dims, pl = textPlane(y), P = q => { const v = project(q); return ((v[0] - b[0]) * s).toFixed(1) + ',' + ((v[1] - b[1]) * s).toFixed(1); };
       const rect = z => [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, -1]].map(([i, j]) => P([i * d[0] / 2, j * d[1] / 2, z])).join(' ');
@@ -685,7 +1099,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
       fade.forEach(el => { if (!el.contains(srcImg)) el.animate([{ opacity: getComputedStyle(el).opacity }, { opacity: 0 }], { duration: 180, fill: 'forwards' }); });
       await Promise.all([seqP, new Promise(r => setTimeout(r, 160))]);
     }
-    cs.innerHTML = caseHTML(y); cs.classList.add('pre');
+    cs.innerHTML = caseHTML(y); cs.classList.add('pre'); { const sp = cs.querySelector('.soon p'); sp.style.setProperty('--d', '350ms'); kin(sp); sp.classList.add('re'); }
     home.hidden = true; cs.hidden = false; scrollTo(0, 0); current = y; layoutScene();
     const hero = $('#heroImg'), pt = $('#ptext');
     await (hero.decode ? hero.decode().catch(() => {}) : 0);
@@ -700,7 +1114,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
       cs.classList.remove('entering');                 /* only the text and pictures fade in; the robot never blinks */
     }
     cs.classList.remove('pre');
-    requestAnimationFrame(() => pt.classList.remove('off'));
+    requestAnimationFrame(() => { pt.classList.remove('off'); const sp = cs.querySelector('.soon p'); if (sp) sp.classList.remove('re'); });
     if (hold) hold.remove();
     if (srcImg) srcImg.style.visibility = '';
     home.getAnimations({ subtree: true }).forEach(a => a.cancel());
@@ -780,7 +1194,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   });
   row.addEventListener('pointerover', e => { const b = e.target.closest('.bot'); if (b) frames(b.dataset.y); });
   tile.addEventListener('pointerenter', () => frames(TILE));
-  setTimeout(() => [...ORDER].reverse().forEach(prime), document.documentElement.classList.contains('intro') ? 4200 : 300);   /* the opening's drive-in frames go first; the turns follow once it has played */
+  setTimeout(() => [...ORDER].reverse().forEach(prime), document.documentElement.classList.contains('intro') ? 7000 : 300);   /* the opening's drive-in frames go first; the turns follow once it has played */
   /* download the turns early (newest first); unpack only on demand */
 
   addEventListener('resize', fit);
@@ -807,12 +1221,12 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
       const ims = [], loads = [];
       for (let f = s0; f < N - 1; f++) { const im = new Image(); im.src = `img/drivein/${tier}/${pad(f)}.webp`; ims[f] = im;
         loads.push(new Promise((ok, no) => { im.onload = ok; im.onerror = no; })); }
-      return Promise.all(loads).then(() => () => {
+      return Promise.all(loads).then(() => () => new Promise(stopped => {
         const cv = document.createElement('canvas'); cv.className = 'drive'; cv.width = D.tiers[tier][0]; cv.height = D.tiers[tier][1];
         const c2 = cv.getContext('2d');
         cv.style.cssText = `left:${car.offsetLeft - D.still_at[0] * k}px;top:${car.offsetTop - D.still_at[1] * k}px;width:${D.canvas[0] * k}px;height:${D.canvas[1] * k}px;transform-origin:${D.still_at[0] * k + cw / 2}px 50%`;
-        stage.appendChild(cv); car.style.visibility = 'hidden'; stage.classList.add('wip-wait');
-        const flash = () => { if (!stage.classList.contains('wip-wait')) return; stage.classList.remove('wip-wait'); stage.classList.add('wip-flash'); setTimeout(() => stage.classList.remove('wip-flash'), 700); };
+        stage.appendChild(cv); car.style.visibility = 'hidden';
+        const flash = stopped;   /* the car has stopped: the opening flickers WIP on from here */
         const t0 = performance.now(); let shown = -1;
         const step = now => {
           const fp = s0 + Math.max(0, now - t0) / 1000 * D.fps, f = Math.floor(fp);
@@ -824,16 +1238,26 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
           requestAnimationFrame(step);
         };
         step(t0);
-      });
+      }));
     }).catch(() => null);
   }
   /* the entrance waits for the two pictures so nothing pops in halfway (gives up after three seconds), then up to 1.8 s more for the
      drive-in frames; on a slow line the page simply opens with the car already parked */
   if (document.documentElement.classList.contains('intro')) {
     const pics = [$('#car'), $('#tstage img')].filter(Boolean).map(im => im.decode ? im.decode().catch(() => {}) : 0);
+    const de = document.documentElement, stage = $('#mstage'), t0 = performance.now();
+    stage.classList.add('wip-wait');
+    requestAnimationFrame(() => de.classList.add('lit'));   /* the light comes up first */
+    const flicker = () => new Promise(done => { de.classList.add('wipped'); stage.classList.remove('wip-wait'); stage.classList.add('wip-flash'); setTimeout(() => { stage.classList.remove('wip-flash'); done(); }, 600); });
+    let shown = false;
+    const reveal = () => { if (shown) return; shown = true; stage.classList.remove('wip-wait', 'wip-flash');
+      de.classList.add('play'); de.classList.remove('intro', 'rolling'); setTimeout(() => de.classList.remove('play'), 1500); };
     Promise.race([Promise.all(pics), wait(3000)]).then(() => { fit(); return Promise.race([driveIn(), wait(1800).then(() => null)]); })
-      .then(drive => { fit(); const de = document.documentElement; de.classList.add('play'); de.classList.remove('intro'); setTimeout(() => de.classList.remove('play'), 1000);
-        if (typeof drive === 'function') drive(); });
+      .then(drive => wait(Math.max(0, 1200 - (performance.now() - t0))).then(() => drive))   /* let the light settle a moment */
+      .then(drive => { fit(); de.classList.add('rolling');
+        return typeof drive === 'function' ? drive() : wait(1000); })   /* drives in and stops (or, if the frames were late, fades in parked) */
+      .then(flicker).then(() => wait(350)).then(reveal);
+    setTimeout(reveal, 12000);   /* never leave the page dark */
   }
   const h = location.hash.replace('#r', '');
   if (R[h] && M.r[h]) { hist('replace', { r: h }, location.href); home.hidden = true; cs.hidden = false; current = h;
