@@ -3,9 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#f0f0ec">
 <title>Jarrett Hutto</title>
 <meta name="description" content="Jarrett Hutto. Product design and engineering. jarrett@jthutto.com">
-<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
@@ -19,7 +23,9 @@
   --sans: "Breul Grotesk", "Breul Grotesk A", "Archivo", "Helvetica Neue", Arial, sans-serif;
   --mono: var(--sans);
   --m: 40px; --g: 20px; --head: 68px;
-  color-scheme: light;
+  color-scheme: only light;
+  /* wide screens: everything sits in a centred column at most this wide */
+  --maxw: 1440px; --pad: max(var(--m), calc((100vw - var(--maxw)) / 2));
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--paper); color: var(--ink); }
@@ -51,6 +57,13 @@ img { display: block; max-width: 100%; }
   letter-spacing: .16em; text-transform: uppercase; color: var(--mute); transition: opacity .25s ease; }
 #home.open .more { opacity: 0; pointer-events: none; }
 @media (min-width: 761px) {
+  .bar { padding-left: var(--pad); padding-right: var(--pad); }
+  .grid { padding-left: var(--pad); padding-right: var(--pad); }
+  .band { padding-left: var(--pad) !important; padding-right: var(--pad) !important; }
+  .scene { margin: 0 auto; }
+  /* open: if the robots would come out too small, the two projects above shrink (scaled from the top) to make room */
+  .herowrap { transform-origin: 50% 0; }
+  #home.open .herowrap { transform: scale(var(--hs, 1)); margin-bottom: calc(var(--hd, 0) * -1px); }
   #home { height: calc(100svh - var(--head)); min-height: 560px; overflow: hidden; }
   #home.open .sp-top { flex: 0 0 20px; }
   .band { flex: none; height: calc(var(--bandH, 400) * 1px); display: flex; flex-direction: column; justify-content: center; padding-bottom: 36px; }
@@ -149,7 +162,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   .row { overflow-x: auto; overflow-y: hidden; justify-content: flex-start; gap: 0; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
     margin: 0 calc(-1 * var(--m)); }
   .row::-webkit-scrollbar { display: none; }
-  .row .slide { flex: 0 0 74vw; display: flex; justify-content: center; align-items: flex-end; scroll-snap-align: center; }
+  .row .slide { scroll-snap-stop: always; flex: 0 0 74vw; display: flex; justify-content: center; align-items: flex-end; scroll-snap-align: center; }
   .row { transition: height .3s ease; }
   .row .slide:first-child { margin-left: 13vw; } .row .slide:last-child { margin-right: 13vw; }
   .row .slide:not(.on) .bot { opacity: .4; }
@@ -161,7 +174,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   .dots { display: flex; gap: 6px; }
   .dots i { width: 14px; height: 2px; background: var(--line); }
   .dots i.on { background: var(--ink); }
-  .band-foot { height: 28px; }
+  .band-foot { height: calc(72px + env(safe-area-inset-bottom, 0px)); }   /* clears the bottom link bar */
   /* until the write-up arrives, the robot, its name and the note sit centred in the space between the bars */
   .case:not([hidden]) { display: flex; flex-direction: column; min-height: calc(100svh - var(--head)); padding-bottom: calc(46px + env(safe-area-inset-bottom, 0px)); }
   .case .herosec { margin-top: auto; }
@@ -250,6 +263,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   const CARS = { side: 0.0281, q12: 0.0292, q25: 0.035 };   /* three angles rendered; straight side view is his pick (?car=q12|q25 still compares) */
   const carPick = new URLSearchParams(location.search).get('car'), CAR = { floor: CARS[carPick] || CARS.side };
   $('#car').src = `img/miata-${CARS[carPick] ? carPick : 'side'}.webp`;
+  let HS = 1;
   function fit() {
     const root = document.documentElement.style;
     const avail = innerHeight - head() - (phone() ? 50 : 0);
@@ -273,10 +287,14 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
     }
     const W = band.clientWidth || (innerWidth - 2 * (phone() ? 16 : 40));
     let k;
-    if (phone()) k = Math.min((innerHeight * 0.42) / BH, (innerWidth * 0.74) / Math.max(...ORDER.map(tightW)));
+    if (phone()) { const tq = Math.min(...ORDER.map(y => M.r[y].topQ)); k = Math.min((innerHeight * 0.34) / (BH * (1 - tq + 0.04)), (innerWidth * 0.74) / Math.max(...ORDER.map(tightW))); }
     else {
       /* open, the row sits at the top and the robots take the rest of the screen */
-      const bandH = Math.max(260, avail - 20 - $('#herowrap').offsetHeight - 8);
+      /* the robots get at least ~45% of the screen; if the projects above leave less, they shrink to make room */
+      const heroH = $('#herowrap').offsetHeight, minBand = Math.max(280, avail * 0.45);
+      let hs = 1, bandH = avail - 28 - heroH;
+      if (bandH < minBand) { hs = Math.max(0.5, (avail - 28 - minBand) / heroH); bandH = avail - 28 - heroH * hs; }
+      HS = hs; root.setProperty('--hs', hs.toFixed(4)); root.setProperty('--hd', (heroH * (1 - hs)).toFixed(1));
       root.setProperty('--bandH', bandH.toFixed(0));
       k = Math.min((bandH - 36 - 12 - 24) / BH, (W * 0.86) / sumW());
     }
@@ -296,11 +314,11 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
     $('#dots').querySelectorAll('i').forEach((d, j) => d.classList.toggle('on', j === i));
     fitRow();
   }
-  /* phone: the swipe row is only as tall as the robot in the middle, so a short robot doesn't sit under a tall empty gap */
+  /* phone: the swipe row is as tall as the tallest robot from the start, so nothing resizes while you swipe */
   function fitRow() {
     if (!phone()) { row.style.height = ''; return; }
-    const k = parseFloat(document.documentElement.style.getPropertyValue('--k')) || 0.2, t = M.r[ORDER[active]];
-    row.style.height = (k * BH * (1 - t.topQ + 0.04)).toFixed(0) + 'px';
+    const k = parseFloat(document.documentElement.style.getPropertyValue('--k')) || 0.2, topQ = Math.min(...ORDER.map(y => M.r[y].topQ));
+    row.style.height = (k * BH * (1 - topQ + 0.04)).toFixed(0) + 'px';
   }
   row.addEventListener('scroll', () => {
     const mid = row.scrollLeft + row.clientWidth / 2; let best = 0, bd = 1e9;
@@ -329,7 +347,8 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
       const h = band.offsetHeight;
       if (D) {
         const dy = hTop - hw.getBoundingClientRect().top;   /* the row glides up to make room */
-        if (dy) hw.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: D, easing: EASE });
+        const hd = parseFloat(document.documentElement.style.getPropertyValue('--hd')) || 0;
+        if (dy || HS < 1) hw.animate([{ transform: `translateY(${dy}px)`, marginBottom: '0px' }, { transform: `scale(${HS})`, marginBottom: -hd + 'px' }], { duration: D, easing: EASE });
         band.animate([{ height: '0px' }, { height: h + 'px' }], { duration: D, easing: EASE });
         bImgs.forEach((im, i) => { const to = im.getBoundingClientRect(); if (!(to.right > 0 && to.left < innerWidth)) return;
           if (i === TI) { im.closest('.bot').style.zIndex = 2; flip(im, from[0], to, D).finished.then(a => { a.cancel(); im.closest('.bot').style.zIndex = ''; }); return; }
@@ -348,7 +367,8 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
         const h = band.offsetHeight, t0 = hw.getBoundingClientRect().top;
         band.hidden = true; home.classList.remove('open'); const t1 = hw.getBoundingClientRect().top, to = tImgs.map(i => i.getBoundingClientRect());
         band.hidden = false; home.classList.add('open');
-        if (t1 !== t0 && !phone()) hw.animate([{ transform: 'none' }, { transform: `translateY(${t1 - t0}px)` }], { duration: D * .8, easing: EASE, fill: 'forwards' });
+        const hd = parseFloat(document.documentElement.style.getPropertyValue('--hd')) || 0;
+        if ((t1 !== t0 || HS < 1) && !phone()) hw.animate([{ transform: `scale(${HS})`, marginBottom: -hd + 'px' }, { transform: `translateY(${t1 - t0}px)`, marginBottom: '0px' }], { duration: D * .8, easing: EASE, fill: 'forwards' });
         bImgs.forEach((im, i) => { const fr = im.getBoundingClientRect(); if (!(fr.right > 0 && fr.left < innerWidth)) return;
           if (i === TI) im.closest('.bot').style.zIndex = 2;
           flip(im, to[0], fr, D * .8, true);
@@ -379,6 +399,8 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
       const bc = $('#bcap'), capTo = bc.getBoundingClientRect();   /* the caption glides down to its new spot, no fade */
       bc.animate([{ transform: `translateY(${capFrom.top - capTo.top}px)` }, { transform: 'none' }], { duration: D * .7, easing: EASE });
       $('#mcap').animate([{ opacity: 0 }, { opacity: 0, offset: .3 }, { opacity: 1 }], { duration: D });
+      const r = band.getBoundingClientRect();   /* bring the whole row, caption and name into view */
+      if (r.bottom > innerHeight - 60) scrollBy({ top: Math.min(r.top - head() - 12, r.bottom - innerHeight + 70), behavior: 'smooth' });
       return;
     }
     open = false;
@@ -490,7 +512,7 @@ canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none
   function layoutScene() {
     const sc = $('#scene'); if (!sc) return;
     const y = current, b = sceneBox(y);
-    const availW = innerWidth - 2 * (phone() ? 16 : 40), availH = phone() ? innerHeight * (R[y].em > 0.2 ? 0.66 : 0.56) : (innerHeight - head()) * (R[y].em > 0.2 ? 0.74 : 0.62);
+    const availW = phone() ? innerWidth - 32 : Math.min(innerWidth - 80, 1120), availH = phone() ? innerHeight * (R[y].em > 0.2 ? 0.66 : 0.56) : Math.min(560, (innerHeight - head()) * (R[y].em > 0.2 ? 0.74 : 0.62));   /* desktop: capped, centred */
     const s = Math.min(availW / b[2], availH / b[3]);           /* display px per render px */
     Object.assign(sc.style, { width: b[2] * s + 'px', height: b[3] * s + 'px' });
     const img = $('#heroImg');
