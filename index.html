@@ -22,68 +22,59 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
-<script>{ const a = (new URLSearchParams(location.search).get('ag') || '').split(/[ ,+]/), de = document.documentElement;   /* ?ag=dwg | hollow | both */
-  de.classList.toggle('ag-dwg', a.includes('dwg') || a.includes('both')); de.classList.toggle('ag-hol', a.includes('hollow') || a.includes('both')); }</script>
-<script>document.documentElement.dataset.bar = new URLSearchParams(location.search).get('bar') || 'corners';</script>
-<script>addEventListener('DOMContentLoaded', () => { const l = new URLSearchParams(location.search).get('logo'); if (l) document.getElementById('logoImg').src = `img/logo-${l}.svg`; });</script>
-<script>document.documentElement.dataset.wip = new URLSearchParams(location.search).get('wip') || 'echo';</script>
 <script>/* the opening plays on a real load or reload of the home page only, never when coming back to it with the browser's back/forward */
 if (!/^#r\d/.test(location.hash) && !matchMedia('(prefers-reduced-motion: reduce)').matches && ((performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}).type !== 'back_forward') document.documentElement.classList.add('intro');</script>
 <style>
-/* Layout (round 3, camera B): the page is the floor. No rules; every robot is rendered by one shared camera
-   (85 mm, 4.5 m, eye 45 cm) with its real shadow, so they share a scale and a horizon. The robots are ONE compact tile
-   that opens a full-width band under its row. Single light look on purpose: this mocks the site itself. */
+/* jthutto.com, round 7: one quiet system. One small size for every word of UI (13 px), two weights (400 text, 500 names
+   and labels), one grey, sentence case, no tracking. The robots, the Miata drive-in, the perspective floor and the slow
+   light are the only things that move. Every robot is rendered by one shared camera (85 mm, 4.5 m, eye 45 cm), so they
+   share a scale and a horizon. */
 :root {
-  --paper: #f0f0ec; --ink: #151514; --mute: #84857f; --line: #cfd0c9; --ghost: #e4e4df; --red: #de2910;
-  /* Breul Grotesk everywhere (his pick). Until the font files arrive, Archivo stands in; swap the first name only. */
-  --sans: "Breul Grotesk", "Breul Grotesk A", "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --mono: var(--sans);
-  --m: 40px; --g: 20px; --head: 68px;
-  color-scheme: only light;
-  /* wide screens: everything sits in a centred column at most this wide */
+  --paper: #f0f0ec; --ink: #1f1f1d; --mute: #85867f; --line: #d2d3cc;
+  /* Breul Grotesk is the pick; until the font files arrive, Archivo stands in. */
+  --sans: "Breul Grotesk", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --t: 13px;
+  --m: 40px; --g: 20px; --head: 72px;
   --maxw: 1440px; --pad: max(var(--m), calc((100vw - var(--maxw)) / 2));
+  color-scheme: only light;
 }
 * { box-sizing: border-box; }
 html { background: var(--paper); }
 html, body { margin: 0; color: var(--ink); }
-body { font: 400 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body { font: 400 var(--t)/1.4 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
-:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
 img { display: block; max-width: 100%; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-.bar { position: sticky; top: 0; z-index: 20; height: var(--head); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-  padding: 0 max(var(--m), env(safe-area-inset-right, 0px)) 0 max(var(--m), env(safe-area-inset-left, 0px)); transition: background-color .4s ease; }
-html.scrolled .bar, .tabbar { background: rgba(240, 240, 236, .66); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+/* ---------- the one bar: mark and name on the left, three links on the right ---------- */
+.bar { position: sticky; top: 0; z-index: 20; height: var(--head); display: flex; align-items: center; gap: 14px;
+  padding: 0 max(var(--pad), env(safe-area-inset-right, 0px)) 0 max(var(--pad), env(safe-area-inset-left, 0px));
+  transition: background-color .3s ease, box-shadow .3s ease; }
+html.scrolled .bar { background: rgba(240, 240, 236, .86); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 1px 0 var(--line); }
 .logo img { height: 22px; width: auto; }
-.name { font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-.name b { font-weight: 800; }
-.links { justify-self: end; display: flex; gap: 28px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
-.links a:hover { color: var(--red); }
-.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--g); padding: 0 var(--m); }
+.name { font-weight: 500; white-space: nowrap; }
+.links { margin-left: auto; display: flex; gap: 28px; }
+.links a { color: var(--mute); transition: color .2s ease; }
+.links a:hover, .links a:focus-visible { color: var(--ink); }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--g); padding: 0 var(--pad); }
+
+/* the one status label: a small hollow ring and one word, in the grey */
+.status { display: inline-flex; align-items: center; gap: 8px; font-weight: 400; color: var(--mute); white-space: nowrap; }
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid currentColor; flex: none; }
 
 /* ---------- home: two projects, one screen ---------- */
-/* The home is exactly one screen: the Miata (greyed, not clickable) and the robots stand on one shared floor line,
-   split by a hairline. Names show on hover only. The robots band opens below. */
 #home { display: flex; flex-direction: column; }
 #home[hidden], .case[hidden] { display: none; }
 .sp { flex: 1 1 0; }
 .herowrap { position: relative; flex: none; }
 .hero { align-items: stretch; }
-.more { position: absolute; left: 0; right: 0; top: calc(100% + 56px); margin: 0; text-align: center; font-size: 11px; font-weight: 700;
-  letter-spacing: .16em; text-transform: uppercase; color: var(--mute); transition: opacity .25s ease; }
-#home.open .more { opacity: 0; pointer-events: none; }
 @media (min-width: 761px) {
-  .bar { padding-left: var(--pad); padding-right: var(--pad); }
-  .grid { padding-left: var(--pad); padding-right: var(--pad); }
-  .band { padding-left: var(--pad) !important; padding-right: var(--pad) !important; }
   .herosec .scene { margin: 0 auto; }
-  /* the robot, its name and the note sit centred in the screen under the header */
   .case:not([hidden]) { display: flex; flex-direction: column; min-height: calc(100svh - var(--head)); }
   .case .herosec { margin-top: auto; }
-  .case .soon { margin-bottom: auto; padding-top: 40px; padding-bottom: 72px; }
-  /* open: if the robots would come out too small, the two projects above shrink (scaled from the top) to make room */
+  .case .note { margin-bottom: auto; padding-top: 40px; padding-bottom: 72px; }
   .herowrap { transform-origin: 50% 0; }
   #home.open .herowrap { transform: scale(var(--hs, 1)); margin-bottom: calc(var(--hd, 0) * -1px); }
   #home { height: calc(100svh - var(--head)); min-height: 560px; overflow: hidden; }
@@ -93,400 +84,154 @@ html.scrolled .bar, .tabbar { background: rgba(240, 240, 236, .66); -webkit-back
   .band-foot { display: none; }
 }
 .tile { position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
-.t-cap { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 20px; height: 44px;
-  font-size: 12px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
-.t-cap .nm { display: flex; align-items: center; gap: 8px; opacity: 0; transition: opacity .16s ease; white-space: nowrap; overflow: hidden; }
-.t-cap .sub { color: var(--mute); }
-.tile:hover .nm, .tile:focus-visible .nm { opacity: 1; }
-.t-cap .lg { height: 14px; width: auto; flex: none; margin-right: 2px; }
-.t-cap .lg-first { height: 16px; }
-.t-cap .lg-miata { height: 14px; transform: translateY(-2.5px); }   /* the script hangs below its baseline; lift it to sit with the caps */
+/* captions: always there, one line, name left and status or toggle right */
+.t-cap { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 20px; height: 44px; font-weight: 500; }
+.t-cap .nm { display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; }
+.t-cap .lg { height: 14px; width: auto; flex: none; }
+.t-cap .lg-first { height: 15px; }
+.t-cap .lg-miata { height: 14px; transform: translateY(-2.5px); margin-right: 10px; }   /* the script hangs below its baseline; lift it to sit with the caps */
 .t-miata { grid-column: 1 / span 7; cursor: default; }
 .m-stage { position: relative; display: flex; justify-content: center; align-items: flex-end; flex: 1; }
-.m-stage .car { position: relative; z-index: 1; width: calc(var(--cw, 600) * 1px); height: auto; max-width: none; flex: none; transform: scaleX(-1); }   /* mirrored: the car faces right, so it can drive in from the left edge */
-.m-stage.wip-wait .wip { opacity: 0; }   /* WIP stays dark while the car drives in, then flashes on as it stops */
+.m-stage .car { position: relative; z-index: 1; width: calc(var(--cw, 600) * 1px); height: auto; max-width: none; flex: none; transform: scaleX(-1); }   /* mirrored: faces right, drives in from the left */
+.m-stage .drive { position: absolute; z-index: 1; max-width: none; pointer-events: none; will-change: transform; }
+/* WIP: a hollow outline with two fainter echoes trailing behind, like the car's wake. Dark until the car stops, then it flickers on. */
+.wip { position: absolute; z-index: 0; left: 50%; transform: translateX(-50%); bottom: calc(var(--wb, 40) * 1px);
+  font: 900 calc(var(--ws, 300) * 1px)/.74 var(--sans); font-stretch: 112%; letter-spacing: .01em; white-space: nowrap; pointer-events: none; user-select: none;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(78, 79, 74, .62);
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); }
+.wip::before, .wip::after { content: "WIP"; position: absolute; left: 0; top: 0; color: transparent; pointer-events: none; }
+.wip::before { translate: -.07em 0; -webkit-text-stroke: 1.2px rgba(78, 79, 74, .3); }
+.wip::after { translate: -.14em 0; -webkit-text-stroke: 1px rgba(78, 79, 74, .14); }
+.m-stage.wip-wait .wip { opacity: 0; }
 .m-stage.wip-flash .wip { animation: wip-flash .5s linear both; }
 @keyframes wip-flash { 0% { opacity: 0; } 10% { opacity: 1; } 22% { opacity: .1; } 36% { opacity: 1; } 48% { opacity: .45; } 62%, 100% { opacity: 1; } }
-.m-stage .drive { position: absolute; z-index: 1; max-width: none; pointer-events: none; will-change: transform; }   /* the drive-in frames, laid exactly over the car */
-.wip { position: absolute; z-index: 0; left: 50%; transform: translateX(-50%); bottom: calc(var(--wb, 40) * 1px);
-  font: 900 calc(var(--ws, 300) * 1px)/.74 var(--sans); font-stretch: 112%; letter-spacing: -.03em; color: #747570; white-space: nowrap; pointer-events: none; user-select: none; }
 .t-robots { grid-column: 8 / span 5; cursor: pointer; }
 .t-robots::before { content: ""; position: absolute; left: calc(var(--g) * -0.5 - 0.5px); top: 0; bottom: 44px; width: 1px; background: var(--line); }
-.t-stage { display: flex; justify-content: center; align-items: flex-end; padding: 0 2%; }
+.t-stage { position: relative; z-index: 1; display: flex; justify-content: center; align-items: flex-end; padding: 0 2%; }
 .t-stage img { width: calc(var(--kt, .2) * var(--w) * 1px); height: auto; flex: none; max-width: none; transition: opacity .25s ease; }
-.toggle { font: 300 22px/1 var(--sans); width: 22px; text-align: center; transition: transform .3s ease; display: inline-block; }
+.toggle { font: 300 20px/1 var(--sans); width: 20px; text-align: center; transition: transform .3s ease; display: inline-block; }
 .t-robots[aria-expanded="true"] .toggle { transform: rotate(45deg); }
 .t-robots[aria-expanded="true"] .t-stage img { opacity: .16; }
 
-/* ---------- the band the robots tile opens: robots only, no text ---------- */
-.band { overflow: hidden; padding: 0 var(--m); }
+/* ---------- the band the robots tile opens ---------- */
+.band { overflow: hidden; padding: 0 var(--pad); }
 .row { display: flex; justify-content: center; align-items: flex-end; gap: var(--gap, 0px); padding-top: 12px; }
 .bot { position: relative; display: flex; align-items: flex-end; flex: none; cursor: pointer; transition: opacity .16s ease; }
 .bot img { width: calc(var(--k, .5) * var(--w) * 1px); height: auto; max-width: none; flex: none; }
 .row.hovering .bot:not(:hover):not(:focus-visible) { opacity: .32; }
-.cap { position: absolute; left: 50%; transform: translateX(-50%); top: calc(100% + 6px); white-space: nowrap; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; opacity: 0; transition: opacity .16s ease; }
-.cap b { font-weight: 700; margin-right: .5em; }
-.cap span { font-family: var(--mono); color: var(--mute); letter-spacing: 0; }
-.bot:hover .cap, .bot:focus-visible .cap { opacity: 1; }
+.cap { position: absolute; left: 50%; transform: translateX(-50%); top: calc(100% + 10px); white-space: nowrap; }
+.cap b, .mcap b { font-weight: 500; margin-right: .5em; }
+.cap span, .mcap .yr { color: var(--mute); }
 .band-foot { height: 64px; }
 .mcap { display: none; }
 .bcap { display: none; }
 #home.snap .tile, #home.snap .row, #home.snap .bot, #home.snap .bot img { transition: none !important; }
 
-/* ---------- robot page: the robot, its name standing beside it in the render's perspective, and one line ---------- */
+/* ---------- robot page ---------- */
 .case { transition: opacity .22s ease; overflow-x: clip; }
 .case.pre { opacity: 0; transition: none; }
 .case > * { transition: opacity .32s ease; }
 .case.entering > *:not(.herosec) { opacity: 0; transition: none; }
-.crumbs { position: relative; z-index: 3; padding-top: 14px; display: flex; font-size: 20px; line-height: 1; }
-.crumbs a { padding: 4px 8px 4px 0; }
-.crumbs a:hover { color: var(--red); }
+.crumbs { position: relative; z-index: 3; padding-top: 14px; display: flex; }
+.crumbs a { padding: 4px 8px 4px 0; color: var(--mute); transition: color .2s ease; }
+.crumbs a:hover, .crumbs a:focus-visible { color: var(--ink); }
 .scene { position: relative; margin: 0; }
-.scene .heroimg { position: absolute; max-width: none; pointer-events: none; }
+.scene .heroimg { position: absolute; z-index: 1; max-width: none; pointer-events: none; }
 .world { position: absolute; inset: 0; transform-style: preserve-3d; pointer-events: none; }
 .world svg { position: absolute; transform-origin: 0 0; overflow: visible; }
 .world text { font-family: var(--sans); }
 .world a { pointer-events: auto; cursor: pointer; }
-.world a:hover .ext { stroke: var(--red); }
+.world a:hover .ext { stroke: var(--mute); }
 .ptext { transition: opacity .35s ease; }
 .ptext.off { opacity: 0; transition: none; }
-/* ---------- the atmosphere: a soft, grainy light that drifts very slowly behind everything ----------
-   A tiny canvas (about 96 px wide) is painted with a few large pale light and shade pools and stretched over the screen,
-   so the stretch itself does the blurring; a fixed tile of grain sits on top. Redrawn at most ~24 times a second. */
-.atmos, .grain { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-.atmos { transition: opacity 2.4s ease; }
-.grain { background-size: 180px 180px; }
-html.intro:not(.lit) .atmos { opacity: 0; }
+.note { display: flex; justify-content: center; align-items: center; gap: 14px; }
+.note p { grid-column: 1 / -1; margin: 0; display: flex; justify-content: center; gap: 14px; }
 
-/* ---------- opening the site: the light comes up, the Miata drives in and stops, WIP flickers on, and only then
-   does everything else fade in, once, all together ---------- */
-html.intro .bar, html.intro .tabbar, html.intro .t-robots, html.intro .more, html.intro .t-miata .t-cap, html.intro:not(.rolling) .car { opacity: 0; pointer-events: none; }
+/* ---------- the light: a very slow grey drift behind everything, with a fine grain that only shows in its darker
+   pools (white specks screened over the light; on near-white paper they vanish) ---------- */
+.atmos, .grain, .soft { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.atmos { transition: opacity 2.4s ease; }
+.grain { mix-blend-mode: screen; }
+html.intro:not(.lit) .atmos { opacity: 0; }
+/* the floor on robot pages: unlabelled hairlines in the render's own perspective, a pool around the robot */
+.soft { overflow: hidden; }
+.soft .persp { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; opacity: 0; transition: opacity .2s ease; }
+.soft .persp.on { opacity: 1; transition: opacity 4.5s cubic-bezier(.45,0,.25,1); }
+.persp .g { fill: none; stroke: rgba(60, 61, 57, .12); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* ---------- opening: the light comes up and the Miata drives in and stops; WIP flickers on. Everything else is simply there. ---------- */
+html.intro:not(.rolling) .car { opacity: 0; }
 html.intro.rolling .car { animation: in-car .9s ease both; }
 @keyframes in-car { from { opacity: 0; } }
-html.play .bar, html.play .tabbar, html.play .t-robots, html.play .more, html.play .t-miata .t-cap { animation: in-soft 1.3s cubic-bezier(.2,.7,.2,1) both; }
-@keyframes in-soft { from { opacity: 0; translate: 0 10px; } }
-.soon { padding-top: 56px; padding-bottom: 120px; }
-.soon p { grid-column: 1 / -1; margin: 0; text-align: center; font-size: 15px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; color: #7a7b76; }
+html.intro:not(.wipped) .wip { opacity: 0; }
 
 canvas.seq { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; will-change: transform; }
-.tabbar { display: none; }
 
 @media (max-width: 760px) {
-  :root { --m: 16px; --g: 12px; --head: 56px; }
-  .bar { grid-template-columns: auto 1fr; }
-  .logo img { height: 18px; }
-  .name { justify-self: end; font-size: 12px; }
-  .links { display: none; }
-  .tabbar { display: flex; position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; justify-content: space-around;
-    padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
-    font-size: 12px; letter-spacing: .06em; text-transform: uppercase; border-top: 1px solid var(--line); }
+  :root { --m: 16px; --g: 12px; --head: 56px; --pad: var(--m); }
+  .bar { gap: 10px; }
+  .logo img { height: 20px; }
+  .links { gap: 16px; }
   .grid { grid-template-columns: minmax(0, 1fr); }
   .grid > * { grid-column: 1 / -1 !important; }
-  .hero { row-gap: 28px; padding-top: 52px; }
+  .hero { row-gap: 28px; padding-top: 44px; }
   .sp { display: none; }
-  .herowrap { padding-bottom: 72px; }
-  .more { position: static; padding-top: 44px; }
-  #home.open .more { display: none; }
+  .herowrap { padding-bottom: 40px; }
   #home.open .herowrap { padding-bottom: 6px; }
   #home.open .t-robots .t-stage { display: none; }
-  /* open on a phone: the caption stays under the robots (the band's own copy of it) instead of jumping above them */
   #home.open .t-robots .t-cap { display: none; }
   .t-robots[aria-expanded="true"] { padding-top: 18px; }
-  .bcap { display: flex; width: 100%; padding: 16px 0 0; height: 40px; background: none; border: 0; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
-  .bcap .nm { opacity: 1; }
+  .bcap { display: flex; width: 100%; padding: 16px 0 0; height: 40px; }
   .bcap .toggle { transform: rotate(45deg); }
-  .mcap { padding-top: 6px !important; }
-  .row { padding-top: 0; }
   .t-robots::before { display: none; }
   .t-robots { border-top: 1px solid var(--line); padding-top: 24px; }
-  .t-cap .nm { opacity: 1; }
-  .row { overflow-x: auto; overflow-y: hidden; justify-content: flex-start; gap: 0; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
-    margin: 0 calc(-1 * var(--m)); }
+  .row { padding-top: 0; overflow-x: auto; overflow-y: hidden; justify-content: flex-start; gap: 0; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
+    margin: 0 calc(-1 * var(--m)); transition: height .3s ease; }
   .row::-webkit-scrollbar { display: none; }
   .row .slide { scroll-snap-stop: always; flex: 0 0 54vw; display: flex; justify-content: center; align-items: flex-end; scroll-snap-align: center; }
-  .row { transition: height .3s ease; }
   .row .slide:first-child { margin-left: 23vw; } .row .slide:last-child { margin-right: 23vw; }
   .row .slide:not(.on) .bot { opacity: .5; }
   .row.hovering .bot:not(:hover) { opacity: 1; }
   .row .cap { display: none; }
-  .mcap { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
-  .mcap b { margin-right: .5em; }
-  .mcap .yr { font-family: var(--mono); color: var(--mute); letter-spacing: 0; }
+  .mcap { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; }
   .dots { display: flex; gap: 6px; }
   .dots i { width: 14px; height: 2px; background: var(--line); }
   .dots i.on { background: var(--ink); }
-  .band-foot { height: calc(72px + env(safe-area-inset-bottom, 0px)); }   /* clears the bottom link bar */
-  /* until the write-up arrives, the robot, its name and the note sit centred in the space between the bars */
-  .case:not([hidden]) { display: flex; flex-direction: column; min-height: calc(100svh - var(--head)); padding-bottom: calc(46px + env(safe-area-inset-bottom, 0px)); }
+  .band-foot { height: calc(40px + env(safe-area-inset-bottom, 0px)); }
+  .case:not([hidden]) { display: flex; flex-direction: column; min-height: calc(100svh - var(--head)); padding-bottom: env(safe-area-inset-bottom, 0px); }
   .case .herosec { margin-top: auto; }
-  .case .soon { margin-bottom: auto; padding-top: 28px; padding-bottom: 44px; }
-  .soon p { font-size: 13px; }
+  .case .note { margin-bottom: auto; padding-top: 28px; padding-bottom: 44px; }
+  .wip { -webkit-text-stroke-width: 1.1px; }
 }
-
-/* ---------- version B: type with gravitas ----------
-   Fewer sizes, lighter and smaller, wide tracking on every small-caps label, one soft near-black and one grey.
-   Words arrive letter by letter (a short rise out of a slight blur), once, after WIP has flickered on;
-   hover captions spell themselves in; links open their tracking a little under the pointer. */
-:root { --ink: #1f1f1d; --mute: #8d8e88; }
-.name { font-size: 11px; font-weight: 600; letter-spacing: .38em; margin-right: -.38em; }
-.name b { font-weight: 600; }
-.links { gap: 36px; font-size: 10.5px; font-weight: 500; letter-spacing: .26em; }
-.links a, .tabbar a { transition: letter-spacing .6s cubic-bezier(.2,.7,.2,1), color .3s ease; }
-.links a:hover { color: var(--ink); letter-spacing: .36em; }
-.t-cap { font-size: 10.5px; font-weight: 600; letter-spacing: .24em; }
-.t-cap .sub { font-weight: 500; }
-.more { font-size: 10px; font-weight: 500; letter-spacing: .5em; padding-left: .5em; color: var(--mute); }
-.cap { font-size: 10.5px; letter-spacing: .24em; top: calc(100% + 10px); }
-.cap b { font-weight: 600; margin-right: 1.1em; }
-.cap span { font-family: var(--sans); letter-spacing: .24em; }
-.soon p { font-size: 10.5px; font-weight: 500; letter-spacing: .5em; padding-left: .5em; color: var(--mute); }
-.wip { color: #7b7c77; }
-/* round 2: WIP is hollow, a fine grey outline with a pale glassy fill, fading out toward the floor so it sinks into the light */
-html.intro:not(.wipped) .wip { opacity: 0; }   /* never visible before its flicker */
-.wip { color: transparent; -webkit-text-stroke: 1.5px rgba(78, 79, 74, .62); letter-spacing: .01em;
-  -webkit-mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); }
-.wip .wi { display: inline-block; }
-/* lean: tipped back, as if propped up behind the car */
-html[data-wip="lean"] .wip { transform-origin: 50% 100%; transform: translateX(-50%) perspective(calc(var(--ws, 300) * 2.6px)) rotateX(30deg); }
-/* arc: the letters fan out over a gentle arch */
-html[data-wip="arc"] .wip .wi { transform-origin: 50% 100%; }
-html[data-wip="arc"] .wip .wi:nth-child(1) { transform: translateY(.05em) rotate(-6deg); }
-html[data-wip="arc"] .wip .wi:nth-child(2) { transform: translateY(-.04em); }
-html[data-wip="arc"] .wip .wi:nth-child(3) { transform: translateY(.05em) rotate(6deg); }
-/* wrap: the word bends around a big cylinder behind the car, its ends turning away from you */
-html[data-wip="wrap"] .wip { perspective: calc(var(--ws, 300) * 2.2px); }
-html[data-wip="wrap"] .wip .wi:nth-child(1) { transform-origin: 100% 50%; transform: rotateY(-38deg); }
-html[data-wip="wrap"] .wip .wi:nth-child(3) { transform-origin: 0% 50%; transform: rotateY(38deg); }
-/* echo: two fainter outlines trail behind, like the car's wake */
-html[data-wip="echo"] .wip::before, html[data-wip="echo"] .wip::after { content: "WIP"; position: absolute; left: 0; top: 0; color: transparent; pointer-events: none; }
-html[data-wip="echo"] .wip::before { translate: -.07em 0; -webkit-text-stroke: 1.2px rgba(78, 79, 74, .3); }
-html[data-wip="echo"] .wip::after { translate: -.14em 0; -webkit-text-stroke: 1px rgba(78, 79, 74, .14); }
-@media (max-width: 760px) { .wip { -webkit-text-stroke-width: 1.1px; } }
-/* round 6: the top bar. Logo and name lock up on the left (hollow mark, a hairline, the name); the links sit right on the
-   same centre line; a hairline under the bar fades out at both ends. Links underline themselves from the left on hover. */
-:root { --head: 72px; }
-.bar { grid-template-columns: auto auto 1fr; height: var(--head); }
-.bar .logo { display: flex; align-items: center; }
-.bar .logo img { height: 26px !important; }
-.bar .name { justify-self: start; display: flex; align-items: center; height: 20px; margin-left: 18px; padding-left: 18px; border-left: 1px solid rgba(60, 61, 57, .3);
-  font-size: 12px !important; font-weight: 600; letter-spacing: .06em !important; margin-right: 0 !important; }
-.bar::after { content: ""; position: absolute; left: var(--pad); right: var(--pad); bottom: 0; height: 1px; pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(60, 61, 57, .16) 14%, rgba(60, 61, 57, .16) 86%, transparent); }
-.bar .links { gap: 34px !important; font-weight: 500; }
-.bar .links a { position: relative; letter-spacing: .06em !important; }
-.bar .links a::after { content: ""; position: absolute; left: 0; right: .06em; bottom: -6px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: 0 50%;
-  transition: transform .5s cubic-bezier(.2,.7,.2,1); }
-.bar .links a:hover::after, .bar .links a:focus-visible::after { transform: scaleX(1); }
-.bar .links a:hover { color: var(--ink); }
-@media (max-width: 760px) {
-  :root { --head: 60px; }
-  .bar { grid-template-columns: auto auto 1fr; height: var(--head); }
-  .bar .logo img { height: 21px !important; }
-  .bar .name { justify-self: start; margin-left: 14px; padding-left: 14px; height: 18px; font-size: 11.5px !important; }
-  .bar::after { left: 16px; right: 16px; }
-}
-
-/* ---------- top bar options (?bar=lockup | corners | capsule | rails) ---------- */
-/* bars whose parts are pinned to the screen must not move as a block while fading in (a moving parent would drag them) */
-html[data-bar="corners"].play .bar, html[data-bar="rails"].play .bar { animation-name: in-fade; }
-@keyframes in-fade { from { opacity: 0; } }
-html[data-bar="corners"].scrolled .bar, html[data-bar="rails"].scrolled .bar { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
-html[data-bar="corners"] .bar::after, html[data-bar="rails"] .bar::after, html[data-bar="capsule"] .bar::after { display: none; }
-@media (min-width: 761px) {
-  /* corners: the logo alone top-left, the links stacked in the top-right corner like a gallery label, the name up the left margin */
-  html[data-bar="corners"] .bar .links { grid-column: 3; justify-self: end; text-align: right; flex-direction: column; align-items: flex-end; gap: 7px !important; align-self: start; padding-top: 22px; font-size: 11px; line-height: 1.25; }
-  html[data-bar="corners"] .bar .links a::after { bottom: -2px; }
-  /* rails: name up the left edge, links down the right edge, a hairline along each margin like a drawing sheet's border */
-  html[data-bar="rails"] .bar .name { position: fixed; left: calc(var(--pad) - 29px); top: 50%; height: auto; margin: 0; padding: 0; border: 0;
-    writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg); font-size: 10.5px !important; color: var(--mute); }
-  html[data-bar="rails"] .bar .links { position: fixed; right: calc(var(--pad) - 29px); top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; gap: 30px !important; font-size: 10.5px; }
-  html[data-bar="rails"] .bar .links a::after { left: auto; right: -6px; top: 0; bottom: .06em; width: 1px; height: auto; transform: scaleY(0); transform-origin: 50% 0; }
-  html[data-bar="rails"] .bar .links a:hover::after { transform: scaleY(1); }
-  html[data-bar="rails"] .bar::before { content: ""; position: fixed; left: calc(var(--pad) - 9px); right: calc(var(--pad) - 9px); top: calc(var(--head) - 10px); bottom: 18px; pointer-events: none;
-    border-left: 1px solid rgba(60, 61, 57, .14); border-right: 1px solid rgba(60, 61, 57, .14); }
-  /* capsule: one small frosted pill floating at the top centre */
-  html[data-bar="capsule"] .bar { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); height: 46px; padding: 0 8px 0 22px; display: flex; align-items: center; gap: 0;
-    border: 1px solid rgba(60, 61, 57, .16); border-radius: 999px; background: rgba(248, 248, 244, .5); -webkit-backdrop-filter: blur(16px) saturate(1.1); backdrop-filter: blur(16px) saturate(1.1);
-    box-shadow: 0 10px 30px rgba(40, 40, 36, .06), inset 0 1px 0 rgba(255, 255, 255, .6); }
-  html[data-bar="capsule"] body { padding-top: var(--head); }
-  html[data-bar="capsule"] .bar .logo img { height: 18px !important; }
-  html[data-bar="capsule"] .bar .name { margin-left: 14px; padding-left: 14px; height: 16px; font-size: 11px !important; }
-  html[data-bar="capsule"] .bar .links { margin-left: 18px; padding-left: 4px; gap: 0 !important; font-size: 11px; }
-  html[data-bar="capsule"] .bar .links a { padding: 9px 14px; border-radius: 999px; transition: background-color .3s ease; }
-  html[data-bar="capsule"] .bar .links a::after { display: none; }
-  html[data-bar="capsule"] .bar .links a:hover { background: rgba(255, 255, 255, .7); }
-}
-@media (max-width: 760px) {
-  html[data-bar="capsule"] .bar { margin: 10px 12px 0; height: 46px; border: 1px solid rgba(60, 61, 57, .16); border-radius: 999px; padding: 0 16px;
-    background: rgba(248, 248, 244, .5); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
-  html[data-bar="capsule"] .tabbar { left: 0; right: 0; margin: 0 auto; width: max-content !important; white-space: nowrap; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); gap: 4px; padding: 6px;
-    border: 1px solid rgba(60, 61, 57, .16); border-radius: 999px; background: rgba(248, 248, 244, .55); box-shadow: 0 10px 30px rgba(40, 40, 36, .08); }
-  html[data-bar="capsule"] .tabbar a { padding: 10px 16px; }
-  html[data-bar="rails"] .bar::after, html[data-bar="corners"] .bar::after { display: block; }
-}
-/* corners lockup: logo and name balanced as one unit (logo about twice the cap height, gap about the logo's height less a third) */
-html[data-bar="corners"] .bar .logo img { height: 22px !important; }
-html[data-bar="corners"] .bar .name { border-left: 0 !important; padding-left: 0 !important; margin-left: 16px !important; height: auto; align-self: center;
-  font-size: 14px !important; font-weight: 500; letter-spacing: .03em !important; }
-html[data-bar="corners"] .bar .name b { font-weight: inherit; }
-.tabname { display: none; }
-/* phones (corners): the logo alone, centred at the top; the name moves down into the bottom bar, above the links */
-@media (max-width: 760px) {
-  html[data-bar="corners"] .bar { grid-template-columns: 1fr; justify-items: center; }
-  html[data-bar="corners"] .bar .logo img { height: 20px !important; }
-  html[data-bar="corners"] .bar .name { display: none; }
-  html[data-bar="corners"] .tabbar { flex-wrap: wrap; row-gap: 9px; padding-top: 12px; }
-  html[data-bar="corners"] .tabname { display: block; flex: 0 0 100%; text-align: center; font-size: 10.5px; font-weight: 500; letter-spacing: .06em; color: var(--mute); }
-  html[data-bar="corners"] .case:not([hidden]) { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
-}
-/* round 3: normal letter spacing everywhere (sizes nudged up a touch to suit), and a bigger mark in the corner */
-.logo img { height: 30px; }
-.name { font-size: 12px; letter-spacing: .06em; margin-right: 0; }
-.links { gap: 30px; font-size: 11.5px; letter-spacing: .06em; }
-.links a:hover { letter-spacing: .12em; }
-.t-cap { font-size: 11.5px; letter-spacing: .05em; }
-.more { font-size: 11px; letter-spacing: .08em; padding-left: 0; }
-.cap { font-size: 11.5px; letter-spacing: .05em; }
-.cap b { margin-right: .6em; }
-.cap span { letter-spacing: .05em; }
-.soon p { font-size: 12px; letter-spacing: .06em; padding-left: 0; }
-@media (max-width: 760px) {
-  html .logo img { height: 24px; }   /* (html prefix: these must beat version B's phone rules further down) */
-  html .name { font-size: 11.5px; letter-spacing: .06em; margin-right: 0; }
-  html .tabbar { font-size: 11px; letter-spacing: .06em; }
-  html .mcap { font-size: 11.5px; letter-spacing: .05em; }
-  html .mcap b { margin-right: .6em; }
-  html .mcap .yr { letter-spacing: .05em; }
-  html .more { font-size: 10.5px; }
-}
-@media (max-width: 760px) {
-  .name { font-size: 10.5px; letter-spacing: .32em; margin-right: -.32em; }
-  .tabbar { font-size: 10px; letter-spacing: .26em; font-weight: 500; }
-  .mcap { font-size: 10.5px; letter-spacing: .22em; }
-  .mcap b { font-weight: 600; margin-right: 1em; }
-  .mcap .yr { font-family: var(--sans); letter-spacing: .22em; }
-  .more { font-size: 9.5px; padding-top: 52px; }
-}
-/* the letters */
-.kin .ch { display: inline-block; white-space: pre;
-  transition: opacity .9s ease, translate 1.3s cubic-bezier(.16,.8,.2,1), filter 1s ease; transition-delay: calc(var(--i) * 42ms + var(--d, 0ms)); }
-html.intro .kin .ch, .kin.re .ch { opacity: 0; translate: 0 .55em; filter: blur(3px); transition: none; }
-/* desktop: hover captions spell themselves in, and let go quickly */
-@media (hover: hover) and (min-width: 761px) {
-  .t-cap .nm { opacity: 1; }
-  .t-cap .nm .lg { opacity: 0; transition: opacity .25s ease; }
-  .tile:hover .nm .lg, .tile:focus-visible .nm .lg { opacity: 1; transition-duration: .7s; }
-  .t-cap .kin .ch, .cap .kin .ch { opacity: 0; translate: 0 .5em; filter: blur(2px); transition: opacity .18s ease, translate .18s ease, filter .18s ease; }
-  .tile:hover .kin .ch, .tile:focus-visible .kin .ch, .bot:hover .kin .ch, .bot:focus-visible .kin .ch { opacity: 1; translate: 0; filter: none;
-    transition: opacity .6s ease, translate .9s cubic-bezier(.16,.8,.2,1), filter .6s ease; transition-delay: calc(var(--i) * 30ms + 80ms); }
-  .cap { opacity: 1 !important; }
-}
-@media (prefers-reduced-motion: reduce) { .kin .ch { transition: none !important; filter: none !important; translate: none !important; } }
-
-/* ---------- version C: the soft-club layer (decoration in greys only; the cars, robots and logos keep their colour) ----------
-   Faint line drawings traced from the 2025 robot's top and side renders drift very slowly behind everything, a grey wash of
-   the 2026 robot is feathered into the bottom corner, a few light streaks sweep past as the Miata stops, and his
-   hand-drawn mark signs the corner. All of it sits under the grain, so it reads as printed. */
-.soft { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
-.soft img { position: absolute; max-width: none; height: auto; }
-.soft .bp-top { width: 50vw; left: -7vw; top: 6vh; opacity: .085; animation: drift-a 70s ease-in-out infinite alternate; }
-.soft .bp-side { width: 30vw; right: -3vw; top: -4vh; opacity: .07; animation: drift-b 90s ease-in-out infinite alternate; }
-.soft .wash { width: 52vw; right: -12vw; bottom: -22vh; opacity: .075; filter: grayscale(1) contrast(1.25);
-  -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent 100%); mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
-  animation: drift-a 110s ease-in-out infinite alternate-reverse; }
-@keyframes drift-a { to { transform: translate3d(1.6vw, -1.2vh, 0) rotate(.6deg); } }
-@keyframes drift-b { to { transform: translate3d(-1.4vw, 1.6vh, 0) rotate(-.5deg); } }
-html.intro:not(.lit) .soft { opacity: 0; }
-/* round 5: a faint floor in perspective, drawn with the renders' own camera (eye 45 cm, 85 mm). Home: square to you, vanishing
-   at the middle of the screen at the robots' horizon. Robot pages: lined up with the robot's frame, so its lines run to the same
-   vanishing points as its bumpers. No labels; it fades out toward the horizon. */
-.soft .persp { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
-.soft .persp { opacity: 0; transition: opacity .2s ease; }
-.soft .persp.on { opacity: 1; transition: opacity 4.5s cubic-bezier(.45,0,.25,1); }
-.persp .g { fill: none; stroke: rgba(60, 61, 57, .12); stroke-width: 1; vector-effect: non-scaling-stroke; }
-
-.soft { transition: opacity 3s ease; }
-
-
-@media (max-width: 760px) {
-  .soft .bp-top { width: 120vw; left: -10vw; top: 14vh; opacity: .07; animation: none; }
-  .soft .bp-side, .soft .wash { display: none; }
-}
-@media (prefers-reduced-motion: reduce) { .soft img { animation: none !important; } }
-
-/* ---------- idea 1, "drawing set" (html.ag-dwg): the site reads like a sheet from an engineering drawing set.
-   Hairline dimension lines with true sizes (the NA's 3,970 mm length, each robot's 870 mm frame with bumpers),
-   a leader-line callout, registration marks in the corners and a title block that names the sheet. Greys only. */
-.dims { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; display: none; }
-html.ag-dwg .dims { display: block; }
-.t-robots .dims { transition: opacity .25s ease; }
-.t-robots[aria-expanded="true"] .dims { opacity: .16; }
-@media (max-width: 760px) { #home.open .t-robots .dims { display: none; } }
-.dims .dl { fill: none; stroke: rgba(70, 71, 67, .55); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.dims .dx { fill: none; stroke: rgba(70, 71, 67, .3); stroke-width: 1; stroke-dasharray: 2 3; }
-.dims .dt { font: 500 10.5px var(--sans); letter-spacing: .05em; fill: #6f706b; text-transform: uppercase; paint-order: stroke; stroke: #eeeeea; stroke-width: 5px; stroke-linejoin: round; }
-.tblock, .reg { display: none; }
-@media (min-width: 761px) {
-  html.ag-dwg .tblock { display: grid; position: fixed; z-index: 3; right: var(--pad); bottom: 26px; grid-template-columns: auto auto; border: 1px solid rgba(70, 71, 67, .35);
-    font: 500 9.5px/1 var(--sans); letter-spacing: .05em; text-transform: uppercase; color: #6f706b; pointer-events: none; }
-  .tblock > div { display: flex; gap: 10px; justify-content: space-between; padding: 6px 9px; border-right: 1px solid rgba(70, 71, 67, .2); border-bottom: 1px solid rgba(70, 71, 67, .2); min-width: 118px; }
-  .tblock > div:nth-child(2n) { border-right: 0; }
-  .tblock > div:nth-last-child(-n+2) { border-bottom: 0; }
-  .tblock span { color: #a2a39d; }
-  .tblock b { font-weight: 600; color: #3d3e3a; }
-  html.ag-dwg .reg { display: block; position: fixed; z-index: 3; width: 13px; height: 13px; pointer-events: none;
-    background: linear-gradient(rgba(70,71,67,.45), rgba(70,71,67,.45)) center / 1px 100% no-repeat, linear-gradient(rgba(70,71,67,.45), rgba(70,71,67,.45)) center / 100% 1px no-repeat; }
-  .reg.tl { left: calc(var(--pad) - 26px); top: calc(var(--head) + 6px); } .reg.tr { right: calc(var(--pad) - 26px); top: calc(var(--head) + 6px); }
-  .reg.bl { left: calc(var(--pad) - 26px); bottom: 20px; } .reg.br { right: calc(var(--pad) - 26px); bottom: 20px; }
-}
-html.intro .dims, html.intro .tblock, html.intro .reg { opacity: 0; }
-html.play .dims, html.play .tblock, html.play .reg { animation: in-soft 1.3s cubic-bezier(.2,.7,.2,1) .25s both; }
-
-/* ---------- idea 2, "hollow house style" (html.ag-hol): the Echo outline from WIP becomes the site's one recurring shape.
-   The team number stands hollow behind the robots tile, and each robot page has its year hollow behind the robot. */
-.echo { position: absolute; z-index: 0; color: transparent; -webkit-text-stroke: 1.4px rgba(78, 79, 74, .5); font-weight: 900; font-stretch: 112%; line-height: .74;
-  letter-spacing: .01em; white-space: nowrap; pointer-events: none; user-select: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.18) 100%); }
-.echo::before, .echo::after { content: attr(data-t); position: absolute; left: 0; top: 0; color: transparent; }
-.echo::before { translate: -.07em 0; -webkit-text-stroke: 1.2px rgba(78, 79, 74, .26); }
-.echo::after { translate: -.14em 0; -webkit-text-stroke: 1px rgba(78, 79, 74, .12); }
-.hol { display: none; }
-html.ag-hol .hol { display: block; }
-.t-robots .hol { left: 50%; translate: -50% 0; transition: opacity .25s ease; }
-.t-robots[aria-expanded="true"] .hol { opacity: .25; }
-.t-stage { position: relative; z-index: 1; }
-.scene .hol { left: 0; top: 0; }
-.scene .heroimg { z-index: 1; }
-@media (max-width: 760px) { .echo { -webkit-text-stroke-width: 1.1px; } #home.open .t-robots .hol { display: none; } }
-@media (prefers-reduced-motion: reduce) { .bot, .cap, .case, .toggle, .t-stage img, .t-cap .nm, .ptext { transition: none !important; } }
+@media (max-width: 369px) { .name { display: none; } }
+@media (prefers-reduced-motion: reduce) { .bot, .case, .toggle, .t-stage img, .ptext { transition: none !important; } }
 </style>
 </head>
 <body>
-<canvas class="atmos" id="atmos" aria-hidden="true"></canvas><div class="soft" aria-hidden="true"><svg class="persp" id="persp" aria-hidden="true"></svg><img class="bp-top" src="img/soft/bp-2025-top.webp" alt=""><img class="bp-side" src="img/soft/bp-2025-side.webp" alt=""><img class="wash" src="img/2026-front.webp" alt=""></div><div class="grain" id="grain" aria-hidden="true"></div>
+<canvas class="atmos" id="atmos" aria-hidden="true"></canvas><div class="soft" aria-hidden="true"><svg class="persp" id="persp" aria-hidden="true"></svg></div><div class="grain" id="grain" aria-hidden="true"></div>
 <header class="bar">
-  <a class="logo" href="#home" data-go="home" aria-label="Home"><img src="img/logo-line.svg" alt="JT" id="logoImg"></a>
-  <div class="name" data-kin="0"><b>Jarrett</b> Hutto</div>
-  <nav class="links" aria-label="Links"><a href="#home" data-go="home" data-kin="420">Resume</a><a href="mailto:jarrett@jthutto.com" data-kin="560">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener" data-kin="700">LinkedIn</a></nav>
+  <a class="logo" href="#home" data-go="home" aria-label="Home"><img src="img/logo-line.svg" alt="JT"></a>
+  <span class="name">Jarrett Hutto</span>
+  <nav class="links" aria-label="Links"><a href="#home" data-go="home">Resume</a><a href="mailto:jarrett@jthutto.com">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener">LinkedIn</a></nav>
 </header>
 
 <main id="home">
   <div class="sp sp-top"></div>
   <div class="herowrap" id="herowrap">
   <div class="hero grid">
-    <div class="tile t-miata" aria-label="Miata, coming soon">
-      <div class="m-stage" id="mstage"><span class="wip" aria-hidden="true"><span class="wi">W</span><span class="wi">I</span><span class="wi">P</span></span><img class="car" id="car" src="img/miata-side.webp" alt="Mazda Miata NA, grey clay model"></div>
-      <span class="t-cap"><span class="nm"><img class="lg lg-miata" src="brand/miata.svg" alt="Miata"><span class="sub" data-kin="200">Coming soon</span></span></span>
+    <div class="tile t-miata" aria-label="Miata, in progress">
+      <div class="m-stage" id="mstage"><span class="wip" aria-hidden="true">WIP</span><img class="car" id="car" src="img/miata-side.webp" alt="Mazda Miata NA, grey clay model"></div>
+      <span class="t-cap"><span class="nm"><img class="lg lg-miata" src="brand/miata.svg" alt="Miata"><span class="status">In progress</span></span></span>
     </div>
     <button type="button" class="tile t-robots" id="robotsTile" aria-expanded="false" aria-controls="band" aria-label="FIRST Robotics, FRC 4639 robots">
-      <span class="hol echo" id="holT" data-t="4639" aria-hidden="true">4639</span><span class="t-stage" id="tstage"></span>
-      <span class="t-cap"><span class="nm"><img class="lg lg-first" src="brand/first.webp" alt="FIRST"><span data-kin="300">Robotics</span></span><span class="toggle" aria-hidden="true">+</span></span>
+      <span class="t-stage" id="tstage"></span>
+      <span class="t-cap"><span class="nm"><img class="lg lg-first" src="brand/first.webp" alt="FIRST"><span>Robotics</span></span><span class="toggle" aria-hidden="true">+</span></span>
     </button>
   </div>
-  <p class="more" data-kin="900">More coming soon</p>
   </div>
   <section class="band" id="band" aria-label="FRC 4639 robots" hidden>
     <div class="row" id="row"></div>
-    <button type="button" class="t-cap bcap" id="bcap" aria-label="Close FIRST Robotics"><span class="nm"><img class="lg lg-first" src="brand/first.webp" alt="FIRST"><span data-kin="300">Robotics</span></span><span class="toggle" aria-hidden="true">+</span></button>
+    <button type="button" class="t-cap bcap" id="bcap" aria-label="Close FIRST Robotics"><span class="nm"><img class="lg lg-first" src="brand/first.webp" alt="FIRST"><span>Robotics</span></span><span class="toggle" aria-hidden="true">+</span></button>
     <div class="mcap" id="mcap"><span><b id="mname"></b><span class="yr" id="myear"></span></span><span class="dots" id="dots"></span></div>
     <div class="band-foot"></div>
   </section>
@@ -494,21 +239,17 @@ html.ag-hol .hol { display: block; }
 </main>
 
 <main id="case" class="case" hidden></main>
-<div class="tblock" id="tblock" aria-hidden="true"><div><span>Title</span><b id="tbT">Portfolio</b></div><div><span>Sheet</span><b id="tbS">01 / 04</b></div>
-<div><span>Drawn</span><b>J. Hutto</b></div><div><span>Scale</span><b id="tbC">NTS</b></div></div>
-<i class="reg tl" aria-hidden="true"></i><i class="reg tr" aria-hidden="true"></i><i class="reg bl" aria-hidden="true"></i><i class="reg br" aria-hidden="true"></i>
-<nav class="tabbar" aria-label="Links"><span class="tabname">Jarrett Hutto</span><a href="#home" data-go="home" data-kin="420">Resume</a><a href="mailto:jarrett@jthutto.com" data-kin="560">Contact</a><a href="https://www.linkedin.com/in/hutto" target="_blank" rel="noopener" data-kin="700">LinkedIn</a></nav>
-
 <script>
 /* the atmosphere (see the CSS). Light pools are pale versions of the paper; nothing here is darker than a light grey. */
 (() => {
   const cv = document.getElementById('atmos'), gr = document.getElementById('grain');
   if (!cv || !cv.getContext) return;
   const q = new URLSearchParams(location.search), AMT = +(q.get('bg') || 1);   /* ?bg=0.5 softer, ?bg=1.5 stronger */
-  /* grain: one 180 px tile of fine light and dark specks */
-  const g = document.createElement('canvas'); g.width = g.height = 180; const gx = g.getContext('2d'), gd = gx.createImageData(180, 180);
-  for (let i = 0; i < gd.data.length; i += 4) { const v = Math.random(), lt = v > .5; gd.data[i] = gd.data[i + 1] = gd.data[i + 2] = lt ? 255 : 40; gd.data[i + 3] = Math.abs(v - .5) * 2 * (lt ? 34 : 22); }
-  gx.putImageData(gd, 0, 0); gr.style.backgroundImage = `url(${g.toDataURL()})`;
+  /* grain: one tile of single-device-pixel white specks, screened over the light, so it only shows in the darker grey pools */
+  const dpr = Math.min(3, devicePixelRatio || 1), GT = 256;
+  const g = document.createElement('canvas'); g.width = g.height = GT; const gx = g.getContext('2d'), gd = gx.createImageData(GT, GT);
+  for (let i = 0; i < gd.data.length; i += 4) { gd.data[i] = gd.data[i + 1] = gd.data[i + 2] = 255; gd.data[i + 3] = Math.pow(Math.random(), 3) * 110; }
+  gx.putImageData(gd, 0, 0); gr.style.backgroundImage = `url(${g.toDataURL()})`; gr.style.backgroundSize = `${GT / dpr}px ${GT / dpr}px`;
   const P = [240, 240, 236];
   /* pools: colour, strength, radius (share of the long side), home (x, y), drift (x, y amplitude), periods in seconds, phase */
   const POOLS = [
@@ -541,26 +282,6 @@ html.ag-hol .hol { display: block; }
 })();
 /* the header gets a frosted backing only once the page has scrolled under it */
 addEventListener('scroll', () => document.documentElement.classList.toggle('scrolled', scrollY > 2), { passive: true });
-</script>
-<script>
-/* version B: split words into letters for the kinetic type. kin(el) splits once; kin(el, true) re-plays the entrance. */
-window.kin = (el, replay) => {
-  if (!el) return;
-  const txt = el.textContent;
-  if (el.dataset.kt !== txt) {   /* (re)split when the words changed */
-    if (el.dataset.kin !== undefined) el.style.setProperty('--d', (+el.dataset.kin || 0) + 'ms');
-    let i = 0;
-    const walk = n => { [...n.childNodes].forEach(c => {
-      if (c.nodeType === 3) { const f = document.createDocumentFragment();
-        for (const chr of c.textContent) { const sp = document.createElement('span'); sp.className = 'ch'; sp.style.setProperty('--i', i++); sp.textContent = chr; f.appendChild(sp); }
-        c.replaceWith(f); }
-      else if (c.nodeType === 1 && !c.classList.contains('ch')) walk(c); }); };
-    walk(el); el.classList.add('kin'); el.dataset.kt = el.textContent;
-    if (!el.closest('a, button') && !el.getAttribute('aria-label')) el.setAttribute('aria-label', txt.trim());
-  }
-  if (replay) { el.classList.add('re'); void el.offsetWidth; el.classList.remove('re'); }
-};
-document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[data-kin]').forEach(el => kin(el)));
 </script>
 <script src="turn/meta-v13.js"></script>
 <script>
@@ -601,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
   $('#dots').innerHTML = ORDER.map(() => '<i></i>').join('');
   $('#tstage').innerHTML = imgTag(TILE, '--kt').replace('style="', `style="margin-top:calc(var(--kt) * ${(-(M.r[TILE].topQ - 0.03) * BH).toFixed(1)}px);`);
   row.innerHTML = ORDER.map((y, i) => `<div class="slide" data-i="${i}"><a class="bot" href="#r${y}" data-y="${y}" aria-label="${R[y].name}, ${y}">${imgTag(y, '--k')}<span class="cap"><b>${R[y].name}</b><span>${y}</span></span></a></div>`).join('');
-  row.querySelectorAll('.cap').forEach(c => kin(c));
 
   const sumW = () => ORDER.reduce((s, y) => s + tightW(y), 0);
   /* the Miata render: its crop and where its tyres meet the floor (fraction of image height from the bottom) */
@@ -645,63 +365,10 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
     const ctr = P([0, 0]), side = P([o[0] * 2.6, 0]), rx = Math.max(140, Math.abs(side[0] - ctr[0]) * 1.9);
     persp(L, ctr, rx, rx * 0.42);
   }
-  /* ---------- ideas 1 and 2 (see the CSS) ---------- */
-  const NS = 'http://www.w3.org/2000/svg', DE = document.documentElement;
-  const dimH = (x0, x1, y, ye, lab) => { const m = (x0 + x1) / 2, g = lab.length * 3.4 + 9;
-    return `<path class="dl" d="M${x0} ${ye}V${y + 6}M${x1} ${ye}V${y + 6}M${x0} ${y}H${m - g}M${m + g} ${y}H${x1}M${x0 - 4} ${y + 4}l8 -8M${x1 - 4} ${y + 4}l8 -8"/>`
-      + `<text class="dt" x="${m}" y="${y + 3.6}" text-anchor="middle">${lab}</text>`; };
-  const svgIn = (host, cls) => { let sv = host.querySelector('svg.' + cls); if (!sv) { sv = document.createElementNS(NS, 'svg'); sv.setAttribute('class', cls); sv.setAttribute('aria-hidden', 'true'); host.appendChild(sv); } return sv; };
-  const sheet = y => { const i = y ? ORDER.slice().reverse().indexOf(y) + 2 : 1; return String(i).padStart(2, '0') + ' / ' + String(ORDER.length + 1).padStart(2, '0'); };
-  function tblock(y, scale) { if (!$('#tbT')) return; $('#tbT').textContent = y ? R[y].name : 'Portfolio'; $('#tbS').textContent = sheet(y); $('#tbC').textContent = scale || 'NTS'; }
-  function agHome() {
-    const tm = $('.t-miata'), car = $('#car'), tr = $('#robotsTile'), im = $('#tstage img');
-    if (DE.classList.contains('ag-dwg') && car && car.offsetWidth) {
-      const a = tm.getBoundingClientRect(), c = car.getBoundingClientRect(), fy = c.bottom - a.top - c.height * CAR.floor;
-      svgIn(tm, 'dims').innerHTML = dimH(c.left - a.left + c.width * 0.054, c.left - a.left + c.width * 0.946, fy + 16, fy - c.height * 0.2, '3,970 mm');
-      if (im && im.offsetWidth) { const b = tr.getBoundingClientRect(), r = im.getBoundingClientRect(), ry = r.top - b.top + r.height * 0.9;
-        svgIn(tr, 'dims').innerHTML = dimH(r.left - b.left + r.width * 0.19, r.left - b.left + r.width * 0.81, ry + 16, ry - r.height * 0.12, '870 mm'); }
-      if (current === 'home') tblock(null);
-    }
-    if (DE.classList.contains('ag-hol') && im && im.offsetWidth) {
-      const b = tr.getBoundingClientRect(), r = im.getBoundingClientRect(), h = $('#holT'), fs = b.width * 0.33;
-      h.style.fontSize = fs.toFixed(1) + 'px'; h.style.top = (r.top - b.top + r.height * 0.9 - fs * 0.74).toFixed(1) + 'px';
-    }
-  }
-  function agScene(y, b, s, sc) {
-    if (DE.classList.contains('ag-hol')) {
-      let h = sc.querySelector('.hol'); if (!h) { h = document.createElement('span'); h.className = 'hol echo'; h.setAttribute('aria-hidden', 'true'); sc.prepend(h); }
-      h.textContent = h.dataset.t = y; const fs = sc.offsetHeight * (phone() ? 0.42 : 0.5); h.style.fontSize = fs.toFixed(1) + 'px';
-      h.style.top = (phone() ? sc.offsetHeight * 0.02 : sc.offsetHeight * 0.06).toFixed(1) + 'px'; h.style.left = (phone() ? -8 : -sc.offsetWidth * 0.04).toFixed(1) + 'px';
-    }
-    if (!DE.classList.contains('ag-dwg')) return;
-    const d = M.r[y].dims, P = q => { const v = project(q); return [(v[0] - b[0]) * s, (v[1] - b[1]) * s]; };
-    const C = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => [i * d[0] / 2, j * d[1] / 2]);
-    const E = [0, 1, 2, 3].map(i => [C[i], C[(i + 1) % 4]]).map(([A, B]) => ({ A, B, my: (P([...A, 0])[1] + P([...B, 0])[1]) / 2 }))
-      .sort((u, v) => v.my - u.my).slice(0, phone() ? 0 : 2);   /* the two edges nearest you (phone: none, the name is painted there) */
-    let out = '', scale = '';
-    for (const { A, B } of E) {
-      const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, L = Math.hypot(mx, my), n = [mx / L, my / L], o = 0.17;
-      const off = (Q, t) => P([Q[0] + n[0] * t, Q[1] + n[1] * t, 0]), a = off(A, o), bb = off(B, o);
-      const len = Math.round(Math.hypot(B[0] - A[0], B[1] - A[1]) * 1000);
-      const ang = Math.atan2(bb[1] - a[1], bb[0] - a[0]) * 180 / Math.PI, rd = ang > 90 || ang < -90 ? ang + 180 : ang;
-      const m = [(a[0] + bb[0]) / 2, (a[1] + bb[1]) / 2], ux = [(bb[0] - a[0]), (bb[1] - a[1])], ul = Math.hypot(...ux), u = [ux[0] / ul, ux[1] / ul], g = 20;
-      const t1 = [m[0] - u[0] * g, m[1] - u[1] * g], t2 = [m[0] + u[0] * g, m[1] + u[1] * g], e0 = off(A, 0.03), e1 = off(A, o + 0.05), f0 = off(B, 0.03), f1 = off(B, o + 0.05);
-      const f = v => v.map(z => z.toFixed(1)).join(' ');
-      out += `<path class="dl" d="M${f(e0)}L${f(e1)}M${f(f0)}L${f(f1)}M${f(a)}L${f(t1)}M${f(t2)}L${f(bb)}M${a[0] - 4} ${a[1] + 4}l8 -8M${bb[0] - 4} ${bb[1] + 4}l8 -8"/>`
-        + `<text class="dt" text-anchor="middle" transform="translate(${f(m)}) rotate(${rd.toFixed(1)})" y="3.6">${len}</text>`;
-      if (!scale) { const ppm = Math.hypot(bb[0] - a[0], bb[1] - a[1]) / Math.hypot(B[0] - A[0], B[1] - A[1]); scale = '1:' + Math.round(1000 / (ppm * 0.2646)); }
-    }
-    if (E.length) {   /* a leader to the bumper at the corner nearest you */
-      const near = C.map(Q => P([...Q, 0.07])).sort((u, v) => v[1] - u[1])[0], k2 = [near[0] - 46, near[1] + 70];
-      out += `<path class="dl" d="M${near[0].toFixed(1)} ${near[1].toFixed(1)}L${k2[0].toFixed(1)} ${k2[1].toFixed(1)}h-22"/><circle cx="${near[0].toFixed(1)}" cy="${near[1].toFixed(1)}" r="2" fill="#6f706b"/>`
-        + `<text class="dt" x="${(k2[0] - 26).toFixed(1)}" y="${(k2[1] + 3.6).toFixed(1)}" text-anchor="end">Bumper</text>`;
-    }
-    const sv = svgIn(sc, 'dims'); sv.innerHTML = out; tblock(y, scale);
-  }
-  new MutationObserver(() => { if (!$('#home').hidden) { tblock(null); requestAnimationFrame(perspHome); } }).observe($('#home'), { attributes: true, attributeFilter: ['hidden'] });
+  new MutationObserver(() => { if (!$('#home').hidden) requestAnimationFrame(perspHome); }).observe($('#home'), { attributes: true, attributeFilter: ['hidden'] });
   function fit() {
     const root = document.documentElement.style;
-    const avail = innerHeight - head() - (phone() ? 50 : 0);
+    const avail = innerHeight - head();
     const tw = $('#tstage').clientWidth || tile.clientWidth;
     const y0 = TILE, visH = (1 - M.r[y0].topQ + 0.03) * BH;
     const kt = Math.min((tw * (phone() ? 0.62 : 0.8)) / tightW(y0), (avail * (phone() ? 0.3 : 0.56)) / visH);
@@ -737,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
     root.setProperty('--kf', (phone() ? (innerWidth - 32) * 0.98 / sumW() : 0.5 * (innerWidth - 80) / sumW()).toFixed(4));
     fitRow();
     if (current !== 'home') layoutScene();
-    agHome(); perspHome();
+    perspHome();
   }
 
   row.addEventListener('pointerover', e => { if (!phone() && e.target.closest('.bot')) row.classList.add('hovering'); });
@@ -746,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
   function setActive(i) {
     active = i; if (open && cache[ORDER[i]]) frames(ORDER[i]);   /* unpack the robot now in the middle of the phone swipe */
     row.querySelectorAll('.slide').forEach((s, j) => s.classList.toggle('on', j === i));
-    if ($('#mname').textContent !== R[ORDER[i]].name) { $('#mname').textContent = R[ORDER[i]].name; $('#myear').textContent = ORDER[i]; kin($('#mcap').firstElementChild, true); }
+    if ($('#mname').textContent !== R[ORDER[i]].name) { $('#mname').textContent = R[ORDER[i]].name; $('#myear').textContent = ORDER[i]; }
     $('#dots').querySelectorAll('i').forEach((d, j) => d.classList.toggle('on', j === i));
     fitRow();
   }
@@ -854,7 +521,6 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
       else if (ti) ti.animate([{ opacity: 0 }, { opacity: 1 }], { duration: D * .4 });
       const tc = $('#robotsTile .t-cap'), capTo = tc.getBoundingClientRect();
       tc.animate([{ transform: `translateY(${capFr.top - capTo.top}px)` }, { transform: 'none' }], { duration: D * .45, easing: EASE });
-      $('.more').animate([{ opacity: 0 }, { opacity: 1 }], { duration: D * .5 });
       band.getAnimations({ subtree: true }).forEach(a => a.cancel());
       busy = false;
     } else { tile.setAttribute('aria-expanded', 'false'); band.hidden = true; home.classList.remove('open'); }
@@ -920,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
   }
   const mm = v => Math.round(v * 1000);
   const linkA = (r, inner) => `<a href="${r.link}" target="_blank" rel="noopener" aria-label="${r.name} on the team's site">${inner}</a>`;
-  const ICONP = `<rect x="-6" y="-6" width="36" height="36" fill="transparent"/><path class="ext" d="M10 4H4v16h16v-6M14 4h6v6M20 4L10 14" fill="none" stroke="#151514" stroke-width="2.4" stroke-linecap="square"/>`;
+  const ICONP = `<rect x="-6" y="-6" width="36" height="36" fill="transparent"/><path class="ext" d="M10 4H4v16h16v-6M14 4h6v6M20 4L10 14" fill="none" stroke="#1f1f1d" stroke-width="2.4" stroke-linecap="square"/>`;
   function plateSVG(y) {
     const r = R[y], pl = textPlane(y);
     if (pl.floor) {
@@ -963,7 +629,7 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
     const last = [...pt.querySelectorAll('text.nmL')].pop(), lk = pt.querySelector('g.lk');
     if (last && lk) { let len = 0; try { len = last.getComputedTextLength(); } catch (e) {}
       if (len > 0) lk.setAttribute('transform', `translate(${Math.round(len + 40)} ${Math.round(+last.getAttribute('y') - +lk.dataset.cap)}) scale(${lk.dataset.s})`); }
-    agScene(y, b, s, sc); perspScene(y, b, s, sc);
+    perspScene(y, b, s, sc);
     if (QS.has('dbg')) {   /* debug: the robot's bumper box and the plate's floor line, projected with the same camera */
       const d = M.r[y].dims, pl = textPlane(y), P = q => { const v = project(q); return ((v[0] - b[0]) * s).toFixed(1) + ',' + ((v[1] - b[1]) * s).toFixed(1); };
       const rect = z => [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, -1]].map(([i, j]) => P([i * d[0] / 2, j * d[1] / 2, z])).join(' ');
@@ -992,10 +658,10 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
 
   function caseHTML(y) {
     return `
-    <div class="grid"><div class="crumbs" style="grid-column:1/-1"><a href="#home" data-go="home" aria-label="Back to all work">&larr;</a></div></div>
+    <div class="grid"><div class="crumbs" style="grid-column:1/-1"><a href="#home" data-go="home">&larr; Back</a></div></div>
     <h1 class="sr">${R[y].name}, ${y}</h1>
     <section class="grid herosec"><div style="grid-column:1/-1">${sceneHTML(y)}</div></section>
-    <section class="soon grid"><p>More information coming soon</p></section>`;
+    <section class="note grid"><p><span>Write-up</span><span class="status">In progress</span></p></section>`;
   }
 
   /* ---------- the rotation: rendered frames played while the robot travels ---------- */
@@ -1099,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
       fade.forEach(el => { if (!el.contains(srcImg)) el.animate([{ opacity: getComputedStyle(el).opacity }, { opacity: 0 }], { duration: 180, fill: 'forwards' }); });
       await Promise.all([seqP, new Promise(r => setTimeout(r, 160))]);
     }
-    cs.innerHTML = caseHTML(y); cs.classList.add('pre'); { const sp = cs.querySelector('.soon p'); sp.style.setProperty('--d', '350ms'); kin(sp); sp.classList.add('re'); }
+    cs.innerHTML = caseHTML(y); cs.classList.add('pre');
     home.hidden = true; cs.hidden = false; scrollTo(0, 0); current = y; layoutScene();
     const hero = $('#heroImg'), pt = $('#ptext');
     await (hero.decode ? hero.decode().catch(() => {}) : 0);
@@ -1114,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[
       cs.classList.remove('entering');                 /* only the text and pictures fade in; the robot never blinks */
     }
     cs.classList.remove('pre');
-    requestAnimationFrame(() => { pt.classList.remove('off'); const sp = cs.querySelector('.soon p'); if (sp) sp.classList.remove('re'); });
+    requestAnimationFrame(() => pt.classList.remove('off'));
     if (hold) hold.remove();
     if (srcImg) srcImg.style.visibility = '';
     home.getAnimations({ subtree: true }).forEach(a => a.cancel());
